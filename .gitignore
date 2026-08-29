@@ -1,0 +1,8 @@
+# Los originales del profesor: NO se publican (la carpeta lo dice en su nombre)
+ProyectosDeAula/docs/_originales_no_subir/
+
+# Basura habitual
+.session.sql
+Thumbs.db
+desktop.ini
+~$*
