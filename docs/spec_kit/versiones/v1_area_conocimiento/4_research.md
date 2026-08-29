@@ -90,8 +90,8 @@ prueba del smoke test. Queda anotado por si una versión futura la pide.
 
 ## D-v1-6 — Un contenedor aparte para inicializar la base
 
-**Contexto.** SQL Server, a diferencia de PostgreSQL o MariaDB, **no
-ejecuta los scripts que se le monten**.
+**Contexto.** SQL Server **no ejecuta los scripts que se le monten**:
+alguien tiene que conectarse al motor y correrlos.
 
 **Alternativas.** (a) Instrucciones manuales en el README ("conéctese y
 corra esto"). (b) Un contenedor `sqlserver-init` que lo haga solo.
@@ -105,7 +105,7 @@ es idempotente. **Estado:** vigente.
 
 ## D-v1-7 — El catálogo se corrige antes de sembrarlo
 
-**Contexto.** El Excel trae `Cienias Naturales` (sin la `c`) en 36 filas.
+**Contexto.** El Excel trae `Cienias Naturales` (sin la `c`) en 48 filas.
 
 **Alternativas.** (a) Cargarlo tal cual: el dato es dado. (b) Corregir la
 digitación al generar las semillas y documentarlo.

@@ -562,10 +562,11 @@ no se ejecuta nada: eso es el Paso 4.
 la API.
 
 Un detalle de SQL Server que vale la pena explicar: **no ejecuta los
-scripts que uno le monte**. PostgreSQL y MariaDB sí; SQL Server no. Por eso
-existe `sqlserver-init`: un contenedor que espera a que el motor **responda
-consultas** (no que "exista"), crea la base si no existe, corre el script y
-se muere. Es idempotente: correrlo mil veces no daña nada.
+scripts que uno le monte** — alguien tiene que conectarse al motor y
+correrlos. Por eso existe `sqlserver-init`: un contenedor que espera a que
+el motor **responda consultas** (no que "exista"), crea la base si no
+existe, corre el script y se muere. Es idempotente: correrlo mil veces no
+daña nada.
 
 En este paso se levantan **solo los dos servicios de base de datos**,
 nombrándolos: el `Dockerfile` de la API todavía está vacío, así que un

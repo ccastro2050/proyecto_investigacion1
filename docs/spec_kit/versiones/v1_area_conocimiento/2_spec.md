@@ -142,7 +142,7 @@ otros nombres.
 | C6 | ¿Se puede reactivar un registro (`activo = 1`)? | **No en la v1.** Es una operación de negocio que nadie pidió. Queda en el NO incluye; si hace falta, se especifica | §2 Alcance |
 | C7 | `?limite=0` o negativo, ¿es 422 o 400? | **400.** La forma del dato es correcta —sí es un entero—; lo que se rompe es una regla de negocio. El 422 se reserva para el cuerpo mal formado | RF1 · Artículo 10 |
 | C8 | Crear con un código que ya existe, ¿409 o 500? | **500**, con el error del motor en `detalle`. En la v1 la llave la defiende la base, no la API; convertirlo en 409 sería lógica de negocio que esta versión no pide | RF3 · criterio 6 |
-| C9 | El catálogo trae **"Cienias Naturales"** (sin la `c`) en 36 de las 218 filas. ¿Se corrige o se carga tal cual? | **Se corrige a "Ciencias Naturales"** al generar las semillas, y queda anotado en la cabecera del script. Es un error de digitación de la fuente, no un dato; cargarlo tal cual lo perpetúa en pantalla y en los informes | `db/investigacion.sql` · `5_data_model` §3 |
+| C9 | El catálogo trae **"Cienias Naturales"** (sin la `c`) en 48 de las 218 filas. ¿Se corrige o se carga tal cual? | **Se corrige a "Ciencias Naturales"** al generar las semillas, y queda anotado en la cabecera del script. Es un error de digitación de la fuente, no un dato; cargarlo tal cual lo perpetúa en pantalla y en los informes | `db/investigacion.sql` · `5_data_model` §3 |
 
 ## 7. Definición de TERMINADA
 

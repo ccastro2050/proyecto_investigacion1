@@ -62,7 +62,7 @@ Tres filas reales, para los ejemplos de los contratos:
 ```
 
 > **Una corrección al catálogo (C9).** El Excel trae `Cienias Naturales`
-> —sin la `c`— en las 36 filas de esa gran área. Se corrige al generar las
+> —sin la `c`— en las 48 filas de esa gran área. Se corrige al generar las
 > semillas y queda anotado en la cabecera de `db/investigacion.sql`. Es un
 > error de digitación de la fuente: cargarlo tal cual lo dejaría a la
 > vista en cada listado y en cada informe.
