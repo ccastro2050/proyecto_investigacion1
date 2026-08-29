@@ -173,8 +173,63 @@ arquitectura en vez de verificar la funcionalidad.
 
 Tres servicios: `sqlserver`, `sqlserver-init` (crea la base y corre el
 script una vez, porque SQL Server no ejecuta lo que se le monte) y
-`api-investigacion` (código montado, `dotnet watch`). Puertos **8070** y
-**11470** (Artículo 10).
+`api-investigacion` (código montado, `dotnet watch`).
+
+### 5.1 El orden de arranque, que es lo que más se rompe
+
+Los tres servicios **no arrancan a la vez**: hay un orden, y respetarlo es
+la diferencia entre que funcione y que no.
+
+```mermaid
+flowchart LR
+    S["sqlserver<br/>tarda 30 a 60 segundos<br/>en aceptar conexiones"] -->|"service_healthy"| I["sqlserver-init<br/>crea la base y corre el script"]
+    I -->|"service_completed_successfully"| A["api-investigacion<br/>arranca con la base ya sembrada"]
+```
+
+**Esperar a que el contenedor exista NO sirve.** El contenedor de SQL
+Server existe en un segundo; el motor tarda entre 30 y 60 en aceptar
+conexiones. Si el inicializador arranca antes, `sqlcmd` falla, el
+contenedor muere, y la API queda hablándole a una base vacía. Es el error
+más común de este compose.
+
+Por eso el `sqlserver` lleva un **healthcheck** que le pregunta al motor si
+ya responde consultas, y los otros dos esperan **condiciones**, no la
+simple existencia:
+
+```yaml
+  sqlserver:
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' -b"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 30s        # margen de gracia: el motor tarda en arrancar
+
+  sqlserver-init:
+    depends_on:
+      sqlserver:
+        condition: service_healthy               # espera a que RESPONDA
+
+  api-investigacion:
+    depends_on:
+      sqlserver-init:
+        condition: service_completed_successfully # espera a que TERMINE BIEN
+```
+
+### 5.2 Lo que hay que fijar, y por qué
+
+| Cosa | Valor | Por qué así |
+|---|---|---|
+| Puertos de `sqlserver` | `"11470:1433"` | 1433 es el puerto del motor adentro; 11470 el del host (Artículo 10) |
+| Puertos de la API | `"8070:8070"` | La API escucha en **8070 también adentro**, no en 8080: así el `Dockerfile`, el `appsettings.json` y los contratos dicen el mismo número |
+| Volumen de datos | `mssqldata:/var/opt/mssql` | El directorio **completo**, no solo `/data`: ahí viven también los registros y los secretos del motor |
+| Volúmenes de la API | `./api_investigacion:/app` más `/app/bin` y `/app/obj` anónimos | El código montado es lo que permite `dotnet watch`. Los dos anónimos dejan los compilados **dentro** del contenedor: sin ellos se mezclan los binarios de Linux con los de Windows y la compilación falla con errores incomprensibles |
+| Nombre de la cadena | `ConnectionStrings__SqlServer` | El doble guion bajo hace que ASP.NET la lea como `ConnectionStrings:SqlServer` y **sobreescriba** el `appsettings.json`. El nombre tiene que ser exactamente ese en los dos lados |
+| Contraseña de `sa` | `Aplicacionweb123!` | Escrita en el compose: es la excepción declarada del Artículo 7, porque esta plantilla corre en contenedores desechables. **En un proyecto real va en el `.env`** |
+| Script montado | `./db:/scripts:ro` en `sqlserver-init` | De solo lectura: el inicializador lo ejecuta, no lo modifica |
+
+**Lo que NO se pone:** `version:` al comienzo del archivo. Compose v2 lo
+ignora y advierte que está obsoleto.
 
 ## 6. Chequeo de constitución
 
