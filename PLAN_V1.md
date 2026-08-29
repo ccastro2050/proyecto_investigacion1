@@ -271,10 +271,70 @@ New-Item -ItemType File postman\coleccion_v1.postman_collection.json
 > `-ItemType File` es obligatorio — sin él, PowerShell se queda preguntando
 > qué tipo de elemento quiere crear.
 
-**Verificación:** deben quedar **13 carpetas** y **32 archivos nuevos**, y
-`git status` los debe listar a todos. Ninguno tiene contenido: el paso 1
-termina con 32 archivos de 0 bytes. Si alguno trae algo adentro, se
-ejecutó de más.
+#### Los dos archivos que ya existen, y por qué hay que ajustarlos
+
+`.gitignore` y `.gitattributes` ya están en el repositorio, pero con el
+contenido que servía cuando aquí solo vivía el material del curso. Para un
+proyecto .NET que corre en contenedores **se quedan cortos**, y las dos
+cosas que les faltan son de las que hacen perder una tarde entera.
+
+**`.gitattributes` — cómo guarda Git los finales de línea.** Windows
+termina cada renglón con dos caracteres (CR LF) y Linux con uno (LF). Da
+igual… hasta que un archivo escrito en Windows se ejecuta dentro de un
+contenedor Linux. Este proyecto tiene exactamente ese caso:
+**`db/init.sh`**, el inicializador de SQL Server. Si Git lo entrega con
+finales de Windows, el contenedor responde:
+
+```
+/bin/bash^M: bad interpreter: No such file or directory
+```
+
+Un error que no se parece en nada a su causa, y que manda al estudiante a
+buscar el problema en Docker o en el script. La línea que lo previene:
+
+```gitattributes
+# Normalizar finales de línea: en el repositorio siempre LF
+* text=auto
+
+# Los scripts de bash DEBEN ir con LF (corren dentro de contenedores Linux)
+*.sh text eol=lf
+
+# La documentación también, para que los diff no se llenen de ruido
+*.md text eol=lf
+```
+
+**`.gitignore` — lo que NUNCA entra al repositorio.** Tres familias:
+
+```gitignore
+# 1. Compilados de .NET: los genera 'dotnet build', jamás se versionan
+bin/
+obj/
+
+# 2. Basura de IDE y borradores personales
+*.user
+.vs/
+*.session.sql
+Thumbs.db
+
+# 3. SECRETOS: el archivo de variables de entorno nunca se sube
+.env
+
+# Lo que ya estaba: los originales del profesor no se publican
+ProyectosDeAula/docs/_originales_no_subir/
+```
+
+> **Sobre el `.env`, y esto hay que decirlo en voz alta:** este ejemplo
+> lleva la contraseña de la base de datos **escrita en el
+> `docker-compose.yml`**, igual que los repositorios del curso, y eso es
+> **solo por didáctica** — para que un `git clone` y un comando basten. A
+> los equipos el método les exige lo contrario: cadena de conexión y
+> `JWT_SECRET` por variables de entorno, `.env` en el `.gitignore` y un
+> `.env.example` en el repositorio. **Esa parte del ejemplo no se copia.**
+
+**Verificación:** deben quedar **14 carpetas** y **32 archivos nuevos** en
+0 bytes, más los dos archivos de configuración actualizados. `git status`
+los debe listar a todos. Si algún archivo nuevo trae contenido, se ejecutó
+de más.
 
 ### Paso 2 — La base de datos viva
 `db/investigacion.sql` = el DDL dado **+ las cuatro correcciones + `activo`** en las 16 tablas del módulo **+ las semillas extraídas del Excel** (218 · 17 · 21 · 6). Cada corrección documentada en la cabecera del propio script. Más `db/init.sh` (el inicializador de SQL Server, que el motor no ejecuta solo) y el `docker-compose.yml` con los tres servicios.
