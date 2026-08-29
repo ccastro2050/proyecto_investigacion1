@@ -707,8 +707,9 @@ REGLAS DE TRABAJO (no negociables):
 2. Vamos a seguir 8_tasks.md FASE POR FASE, en orden. En cada fase:
    a. Me explicas en 3-5 líneas qué vamos a hacer y por qué.
    b. Me entregas los archivos DE A UNO: primero la ruta exacta y el
-      contenido COMPLETO de UN solo archivo, con los comentarios
-      didácticos en español que exige la constitución. Esperas mi "listo"
+      contenido COMPLETO de UN solo archivo, con los comentarios en
+      español que exige la constitución: explican POR QUE está hecho así,
+      no qué hace cada palabra del lenguaje. Esperas mi "listo"
       y solo entonces me das el siguiente.
    c. Al cerrar la fase me dices su comando de verificación y qué salida
       esperar.

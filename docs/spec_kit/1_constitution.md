@@ -131,14 +131,16 @@ del `docker-compose.yml`, que está en el repositorio. El
 > real en la v4: ahí la regla va completa desde la v1. De este ejemplo se
 > copia el método, no las credenciales.
 
-## Artículo 8 — Todo en español, comentado para principiantes
+## Artículo 8 — Todo en español, y el código sustenta sus decisiones
 
 - Nombres, rutas, mensajes, comentarios y documentación: **en español**.
-- El código lleva **comentarios línea a línea**: qué significa cada
-  construcción del lenguaje y para qué sirve aquí. Este repositorio es
-  material de estudio, no solo software.
-- Se prefiere código explícito y repetitivo-pero-legible sobre
-  metaprogramación compacta.
+- Los comentarios explican **por qué** está hecho así —la decisión y su
+  consecuencia—, no qué hace cada palabra del lenguaje. Un comentario que
+  repite la línea de abajo sobra; uno que explica por qué el repositorio
+  no conoce HTTP, no.
+- Se prefiere lo explícito sobre la metaprogramación compacta, y no por
+  didáctica: este código se revisa en Pull Requests y se sustenta
+  oralmente, así que tiene que poder leerse sin descifrarlo.
 
 ## Artículo 9 — Contratos exactos
 
