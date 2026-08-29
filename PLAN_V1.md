@@ -202,7 +202,7 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    P1["Paso 1 — Esqueleto<br/>(hecho)"] --> P2["Paso 2 — LOS DOCUMENTOS<br/>constitucion, mapa y spec kit de la v1"]
+    P1["Paso 1 — Esqueleto"] --> P2["Paso 2 — LOS DOCUMENTOS<br/>constitucion, mapa y spec kit de la v1"]
     P2 --> G{"Compuerta<br/>el 9_checklist en verde"}
     G -->|"en rojo, se vuelve a la spec"| P2
     G -->|"en verde"| P3["Paso 3 — La base de datos"]
@@ -212,9 +212,7 @@ flowchart TD
     P6 --> P7["Paso 7 — Postman, README y conceptos"]
     P7 --> P8["Paso 8 — Cierre y tag v1"]
     classDef compuerta fill:#fde7c8,stroke:#c07a24,stroke-width:2px
-    classDef hecho fill:#e8f5e9,stroke:#4a7
     class G compuerta
-    class P1 hecho
 ```
 
 **Primero se escribe TODO lo que se va a construir, y solo después se
@@ -288,8 +286,8 @@ rutas nuevas a mitad de camino.
 
 ```powershell
 # raíz del proyecto
-#   (.gitignore y .gitattributes YA EXISTEN en este repositorio: no se
-#    vuelven a crear, se editan cuando toque)
+#   (si su repositorio ya trae .gitignore y .gitattributes, no los cree:
+#    ajústeles el contenido — ver más abajo)
 New-Item -ItemType File docker-compose.yml, README.md
 
 # la base de datos (paso 2)
@@ -335,12 +333,12 @@ New-Item -ItemType File postman\coleccion_v1.postman_collection.json
 > `-ItemType File` es obligatorio — sin él, PowerShell se queda preguntando
 > qué tipo de elemento quiere crear.
 
-#### Los dos archivos que ya existen, y por qué hay que ajustarlos
+#### Los dos archivos de configuración de Git, y por qué importan aquí
 
-`.gitignore` y `.gitattributes` ya están en el repositorio, pero con el
-contenido que servía cuando aquí solo vivía el material del curso. Para un
-proyecto .NET que corre en contenedores **se quedan cortos**, y las dos
-cosas que les faltan son de las que hacen perder una tarde entera.
+`.gitignore` y `.gitattributes` se suelen despachar como trámite: se copian
+de cualquier lado y listo. Para un proyecto .NET que corre en contenedores
+eso no alcanza, y **las dos cosas que faltan cuando se copian sin pensar
+son de las que hacen perder una tarde entera**.
 
 **`.gitattributes` — cómo guarda Git los finales de línea.** Windows
 termina cada renglón con dos caracteres (CR LF) y Linux con uno (LF). Da
@@ -693,7 +691,24 @@ contenido. La carpeta `api_facturas/` es lo de menos; lo que se copia es
 - **Las semillas pueden traer sorpresas** además de las ya detectadas (tildes, filas fantasma). Los conteos se verifican contra el documento del módulo y **cualquier diferencia se reporta, no se acomoda**.
 - **Los secretos**: este ejemplo lleva la contraseña a la vista, como plantilla didáctica que es (sección 5). El riesgo real es que alguien copie **esa** parte: por eso la excepción queda escrita en la constitución del ejemplo, en el `README.md` y en el propio `docker-compose.yml`, no solo aquí.
 
-## 10. Estado
+## 10. Dónde vamos
 
-Nada ejecutado. A la espera del visto bueno sobre las decisiones A, B, C y D
-de la sección 3.
+El plan de arriba son **instrucciones para ejecutar**. Esta tabla es lo
+único que lleva la cuenta del avance, y se actualiza a medida que cada
+paso se cierra:
+
+| Paso | Estado |
+|---|---|
+| 1 — Esqueleto | ✅ hecho |
+| 2 — Los documentos | ⏳ en curso |
+| 3 — La base de datos | pendiente |
+| 4 — Docker | pendiente |
+| 5 — La API | pendiente |
+| 6 — Smoke test | pendiente |
+| 7 — Material de apoyo | pendiente |
+| 8 — Cierre y tag `v1` | pendiente |
+
+**La regla de trabajo:** cada paso se **explica antes** de ejecutarlo —qué
+se va a hacer, por qué, para qué y cuál es el resultado esperado— y se
+**revisa después** contra esa verificación. Un paso no se da por cerrado
+porque "corrió": se cierra cuando su verificación da lo que decía.
