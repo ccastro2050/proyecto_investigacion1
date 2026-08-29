@@ -78,18 +78,25 @@ REGLAS DE TRABAJO (no negociables):
    NOTA: la estructura de carpetas y los archivos vacíos YA EXISTEN en mi
    proyecto — no me des comandos para crearlos; tu trabajo es dictarme el
    CONTENIDO de cada archivo.
-3. La base de datos YA VIENE DADA en db/investigacion.sql: la tabla
-   area_conocimiento existe, tiene 218 filas y su llave primaria es un
-   CÓDIGO DE TEXTO (por ejemplo '1A01'), no un entero. No escribas ni
-   modifiques SQL de creación de tablas.
-4. El borrado es LÓGICO: DELETE marca activo = 0, y los listados filtran
+3. Los errores NO nos frenan. Si te pego un error, lo diagnosticas y me
+   das el archivo completo corregido; si no sale rápido, seguimos con las
+   fases siguientes y lo retomamos al final. Al terminar todas las fases
+   me guías para correr el smoke test de 7_quickstart.md y corregimos
+   juntos lo que salga.
+4. La base de datos YA VIENE DADA en db/investigacion.sql + db/init.sh —
+   se montan tal cual en el compose; no escribas ni modifiques SQL de
+   creación de tablas. OJO: el docker-compose.yml TODAVÍA NO EXISTE y
+   escribirlo es tu primera tarea (Fase 0). La tabla area_conocimiento ya
+   tiene sus 218 filas y su llave primaria es un CÓDIGO DE TEXTO (por
+   ejemplo '1A01'), no un entero.
+5. El borrado es LÓGICO: DELETE marca activo = 0, y los listados filtran
    los inactivos. Nunca se borra la fila.
-5. El código debe cumplir 6_contracts.md al pie de la letra: mismos
+6. El código debe cumplir 6_contracts.md al pie de la letra: mismos
    verbos, mismas rutas, mismos códigos de estado y formatos de respuesta,
    incluido el contraste PUT (reemplazo completo → 422 si falta un campo)
    vs PATCH (parcial → 200 con el mismo cuerpo).
-6. Todo en español: nombres, comentarios y mensajes.
-7. Trabajo en Windows con VS Code (terminal integrada de PowerShell) y
+7. Todo en español: nombres, comentarios y mensajes.
+8. Trabajo en Windows con VS Code (terminal integrada de PowerShell) y
    Docker Desktop. Dame los comandos para ese entorno. La API publica el
    puerto 8070 y SQL Server el 11470.
 
@@ -134,8 +141,10 @@ Primero lee, en este orden, los documentos que están bajo docs/spec_kit/
 construir y espera mi confirmación antes de tocar nada.
 
 El código va en api_investigacion/ según la estructura de 3_plan.md.
-docs/ y db/ son SOLO LECTURA: no los modifiques. La base de datos ya viene
-dada en db/investigacion.sql.
+docs/ y db/ son SOLO LECTURA: no los modifiques. La base de datos YA VIENE
+DADA en db/investigacion.sql + db/init.sh — úsalos tal cual para montar
+SQL Server. OJO: el docker-compose.yml todavía NO EXISTE y escribirlo es
+tu primera tarea (Fase 0).
 
 REGLAS (no negociables):
 

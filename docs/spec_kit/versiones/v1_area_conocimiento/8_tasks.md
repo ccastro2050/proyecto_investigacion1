@@ -18,15 +18,31 @@ flowchart TD
     F6 --> F7["Fase 7 — Cierre"]
 ```
 
-## Fase 0 — La base de datos (artefacto dado)
+## Fase 0 — La base de datos en pie
 
-- [ ] `db/investigacion.sql`: el DDL con las cuatro correcciones, la
-      columna `activo` y las semillas del Excel
-- [ ] `db/init.sh`: crear la base y ejecutar el script, una sola vez
-- [ ] `docker-compose.yml`: los servicios `sqlserver` y `sqlserver-init`
+**Lo que YA viene dado** (es artefacto, se usa tal cual — Artículo 5):
 
-**Verificar:** `docker compose up -d sqlserver sqlserver-init` y un
-`SELECT COUNT(*)` que responda **218 · 17 · 21 · 6**.
+- `db/investigacion.sql` — el DDL con sus correcciones, la columna `activo`
+  y las semillas
+- `db/init.sh` — el inicializador
+
+**Lo que hay que ESCRIBIR en esta fase:**
+
+- [ ] `docker-compose.yml` con los servicios `sqlserver` y
+      `sqlserver-init`, montando `./db` como `/scripts`
+
+**Verificar:** `docker compose up -d sqlserver sqlserver-init`, y después
+este conteo — **nombrando las tablas**, que si no, no se sabe cuál es cuál:
+
+| Tabla | Filas esperadas |
+|---|---|
+| `area_conocimiento` | **218** |
+| `objetivo_desarrollo_sostenible` | **17** |
+| `area_aplicacion` | **21** |
+| `universidad` | **6** |
+
+(`termino_clave` y `linea_investigacion` quedan **vacías**: el catálogo de
+referencia no trae datos para ellas.)
 
 ## Fase 1 — El modelo y la excepción · *sirve a todos los RF*
 
