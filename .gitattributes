@@ -1,2 +1,8 @@
+# Normalizar finales de línea: en el repositorio siempre LF
 * text=auto
+
+# Los scripts de bash DEBEN ir con LF (corren dentro de contenedores Linux)
+*.sh text eol=lf
+
+# La documentación también, para que los diff no se llenen de ruido
 *.md text eol=lf
