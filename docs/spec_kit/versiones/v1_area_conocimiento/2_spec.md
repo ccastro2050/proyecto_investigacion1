@@ -57,7 +57,7 @@ otros nombres.
 `POST /api/area_conocimiento` con `{id, gran_area, area, disciplina}`.
 - Los cuatro campos son obligatorios.
 - Nace con `activo = 1`.
-- Código ya existente → 500 (lo rechaza la llave primaria de la base).
+- Código ya existente → **500** (ver C8: por qué 500 y no 409).
 
 ### RF4 — Reemplazar (PUT + cuerpo completo)
 `PUT /api/area_conocimiento/{id}` con `{gran_area, area, disciplina}`.
@@ -74,7 +74,8 @@ otros nombres.
 `DELETE /api/area_conocimiento/{id}` marca `activo = 0`.
 - Devuelve `filasAfectadas`.
 - Inexistente **o ya inactiva** → 404.
-- La fila **no desaparece** de la base.
+- El registro **deja de existir para la API**, pero sigue siendo
+  recuperable: eso es lo que significa que el borrado sea lógico.
 
 ### RF7 — Diagnóstico
 `GET /` → JSON con mensaje, versión (`"v1"`) y la ruta de los contratos.
@@ -119,8 +120,10 @@ otros nombres.
    `POST` con un código que ya existe → **500** con el error del motor en
    `detalle`. En ninguno de los tres casos se toca la base.
 7. **Prueba de capas.** El proyecto `pruebas/` ejecuta el servicio con un
-   repositorio **falso en memoria** —sin SQL Server— y todas sus
-   verificaciones pasan.
+   **repositorio de mentiras**: otra implementación de la misma interfaz
+   que guarda las filas en una lista en memoria, en vez de hablar con la
+   base. Todas sus verificaciones pasan **con SQL Server apagado** — que es
+   la prueba de que las capas están desacopladas ([3_plan](3_plan.md) §4.6).
 
 ## 6. Clarificaciones
 

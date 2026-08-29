@@ -41,6 +41,10 @@ GET /
         "contratos": "/swagger" }
 ```
 
+**Sin desenlaces de error, y a propósito:** no recibe parámetros ni cuerpo,
+y no consulta la base. Si este endpoint no responde 200, el problema no es
+de contrato — es que la API no está arriba.
+
 ## 2. `GET /api/area_conocimiento[?limite=N]` — Listar
 
 ```
