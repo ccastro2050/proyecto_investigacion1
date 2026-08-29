@@ -1,0 +1,373 @@
+{
+  "info": {
+    "name": "Investigación — v1 · area_conocimiento",
+    "description": "Los 7 endpoints de la versión 1, en orden didáctico.\n\nAntes de empezar: `docker compose up -d --build` en la raíz del proyecto.\n\nLa variable `base` apunta a http://localhost:8070. Si usted está probando SU reconstrucción en otro puerto, cámbiela en la pestaña Variables de la colección: una sola edición y todas las peticiones apuntan a su proyecto.\n\nLas peticiones 6 y 7 son la pareja que enseña la diferencia entre reemplazar y actualizar: el MISMO cuerpo responde 422 en PUT y 200 en PATCH.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base",
+      "value": "http://localhost:8070"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Diagnóstico",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            ""
+          ]
+        },
+        "description": "RF7 — dice quién es y qué versión. Si esto no responde, la API no está arriba."
+      }
+    },
+    {
+      "name": "2. Listar todas",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/api/area_conocimiento",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento"
+          ]
+        },
+        "description": "RF1 — devuelve el sobre {tabla, limite, total, datos}. Esperado: total 218."
+      }
+    },
+    {
+      "name": "3. Listar con límite",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/api/area_conocimiento?limite=3",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento"
+          ],
+          "query": [
+            {
+              "key": "limite",
+              "value": "3"
+            }
+          ]
+        },
+        "description": "RF1 — el único filtro de la v1. Esperado: total exactamente 3."
+      }
+    },
+    {
+      "name": "4. Obtener 1A01",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/api/area_conocimiento/1A01",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "1A01"
+          ]
+        },
+        "description": "RF2 — un código que existe. Esperado: 200 con Matemáticas puras."
+      }
+    },
+    {
+      "name": "5. Obtener 9Z99 (no existe)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/api/area_conocimiento/9Z99",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "9Z99"
+          ]
+        },
+        "description": "RF2 — un código que no existe. Esperado: 404 con {estado, mensaje, detalle}."
+      }
+    },
+    {
+      "name": "6. Crear 9Z01",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/api/area_conocimiento",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento"
+          ]
+        },
+        "description": "RF3 — los cuatro campos son obligatorios. Esperado: 200.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"9Z01\",\n  \"granArea\": \"Ciencias Naturales\",\n  \"area\": \"Matemáticas\",\n  \"disciplina\": \"Teoría de números\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "7. Crear sin granArea (422)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/api/area_conocimiento",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento"
+          ]
+        },
+        "description": "RF3 — la validación es la frontera: no llega a la base. Esperado: 422 con errores[].",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"9Z02\",\n  \"area\": \"Matemáticas\",\n  \"disciplina\": \"X\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "8. Crear con código duplicado (500)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/api/area_conocimiento",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento"
+          ]
+        },
+        "description": "C8 — la llave la defiende la base, no la API. Esperado: 500 con el error del motor.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"1A01\",\n  \"granArea\": \"X\",\n  \"area\": \"Y\",\n  \"disciplina\": \"Z\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "9. PUT completo",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/api/area_conocimiento/9Z01",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "9Z01"
+          ]
+        },
+        "description": "RF4 — reemplazo: los tres campos del cuerpo son obligatorios. Esperado: 200.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"granArea\": \"Humanidades\",\n  \"area\": \"Filosofía\",\n  \"disciplina\": \"Ética\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "10. PUT sin 'area' → 422",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/api/area_conocimiento/9Z01",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "9Z01"
+          ]
+        },
+        "description": "La mitad de la pareja didáctica. Reemplazar exige TODO. Esperado: 422.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"granArea\": \"Humanidades\",\n  \"disciplina\": \"Ética\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "11. PATCH con el MISMO cuerpo → 200",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/api/area_conocimiento/9Z01",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "9Z01"
+          ]
+        },
+        "description": "La otra mitad: actualizar se conforma con lo enviado. Esperado: 200. Compare con la petición 10: mismo cuerpo, otro verbo, otra respuesta.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"granArea\": \"Humanidades\",\n  \"disciplina\": \"Ética\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "12. PATCH vacío → 400",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/api/area_conocimiento/9Z01",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "9Z01"
+          ]
+        },
+        "description": "RF5 — pedir una actualización sin decir qué actualizar es regla de negocio rota. Esperado: 400, no 404.",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "13. Eliminar 9Z01 (lógico)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/api/area_conocimiento/9Z01",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "9Z01"
+          ]
+        },
+        "description": "RF6 — marca activo = 0. La fila NO desaparece de la base. Esperado: 200. Vuelva a correr la petición 2: el total baja otra vez a 218."
+      }
+    },
+    {
+      "name": "14. Eliminar otra vez → 404",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/api/area_conocimiento/9Z01",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "9Z01"
+          ]
+        },
+        "description": "C5 — para la API ya no existe. Esperado: 404."
+      }
+    }
+  ]
+}
