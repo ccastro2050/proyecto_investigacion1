@@ -167,6 +167,32 @@ REGLAS (no negociables):
 - **No le crea "terminado":** pídale la salida real de los comandos. El
   criterio de cierre es el smoke test en verde.
 
+## Cuando la IA se equivoca: los tres destinos
+
+Se va a equivocar. Lo que decide si el trabajo mejora o se pudre es **a
+dónde va cada corrección**, y hay tres destinos posibles:
+
+| Si el error es… | La corrección va a… | Cómo se reconoce |
+|---|---|---|
+| **La IA no podía saberlo**: la spec no lo dice, o lo dice de dos maneras | **La spec**, como una Clarificación nueva | Usted mismo duda al contestarle. Si tiene que pensar la respuesta, no estaba escrita |
+| **La spec lo dice, la IA lo ignoró — y vuelve a pasar** | **El prompt** | Se repite con otra IA, en otro chat, después de empezar de cero |
+| **La spec lo dice claro y la IA falló una vez** | **Usted**: le señala el documento y sigue | Al corregirlo, no vuelve a ocurrir |
+
+**La pregunta que separa el segundo del tercero es una sola: ¿se repite?**
+Un error que aparece siempre viene del prompt —la regla existe pero no está
+visible—. Uno que aparece una vez es ruido, y corregirlo es su trabajo de
+supervisor: para eso está mirando.
+
+> **Por qué importa no confundirlos.** Si por cada tropiezo se agrega una
+> regla al prompt, el prompt termina con treinta reglas y **nadie lo lee**
+> — ni la IA, que se pierde entre ellas, ni el siguiente estudiante. Un
+> prompt que crece sin control es un prompt que dejó de funcionar.
+
+**Y hay un cuarto camino que NUNCA se toma:** arreglar el código para que
+"funcione" sin tocar la spec ni el prompt. Eso deja el documento diciendo
+una cosa y el sistema haciendo otra — que es exactamente la deuda de
+especificación contra la que existe este método.
+
 ## Lo que la IA rompe primero, en esta versión
 
 Tres cosas que conviene vigilar desde el primer archivo:

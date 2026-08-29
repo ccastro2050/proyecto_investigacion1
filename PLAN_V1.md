@@ -561,6 +561,16 @@ no se ejecuta nada: eso es el Paso 4.
 `docker-compose.yml` con los tres servicios: SQL Server, el inicializador y
 la API.
 
+> **Este es el primer paso que EJECUTA algo, y ahí está lo que se juega.**
+> Hasta aquí todo fue escribir: la spec dice "218 filas" porque ese número
+> se leyó en el Excel, y el script dice "218" porque así se generó. Son dos
+> promesas que **nadie ha comprobado contra un motor encendido**.
+>
+> Cuando este paso corra, esas promesas se vuelven un hecho — o se caen. Y
+> si se caen, se cae aquí: **antes de que exista una sola línea de código
+> que las dé por ciertas**. Un error en el script descubierto en la Fase 5,
+> con la API a medio construir, cuesta diez veces más.
+
 Un detalle de SQL Server que vale la pena explicar: **no ejecuta los
 scripts que uno le monte** — alguien tiene que conectarse al motor y
 correrlos. Por eso existe `sqlserver-init`: un contenedor que espera a que
@@ -592,8 +602,30 @@ docker compose exec sqlserver bash -c '/opt/mssql-tools18/bin/sqlcmd `
 mismos números que la spec escribió en el Paso 2. Si uno no cuadra, el paso
 no está terminado.
 
-> **Ojo con la memoria:** SQL Server pide alrededor de 2 GB y tarda medio
-> minuto en arrancar. Conviene no tener otros proyectos encendidos.
+#### Antes de correrlo: hágale espacio
+
+**SQL Server pide alrededor de 2 GB de RAM** y tarda entre 30 y 60
+segundos en responder consultas. No es un motor liviano, y si la máquina
+anda apretada el contenedor **se reinicia solo en un bucle** — con un
+error en los registros que habla de memoria, no de su proyecto.
+
+```powershell
+docker ps                    # ¿qué hay encendido ahora mismo?
+docker compose down          # ejecútelo DENTRO de cada proyecto que sobre
+```
+
+Bajar un proyecto **no borra sus datos**: viven en su volumen y vuelven
+intactos al siguiente `up`. Lo que sí borra es `down -v`, y eso es otra
+cosa.
+
+Si aun así se reinicia, revise cuánta memoria le concedió a Docker
+Desktop: *Settings → Resources*. Con menos de 4 GB asignados, SQL Server
+va a sufrir.
+
+**Y si algo falla**, la tabla de síntomas y causas probables está en
+[`7_quickstart.md`](docs/spec_kit/versiones/v1_area_conocimiento/7_quickstart.md)
+§4 — no hay que adivinar: ese documento se escribió justo para este
+momento.
 >
 > **Y una costumbre que sí se copia:** aunque esta plantilla tenga la
 > contraseña a la vista en el `docker-compose.yml` (la excepción de la
@@ -780,6 +812,42 @@ REGLAS (no negociables):
 > implementación: es una ambigüedad de la especificación disfrazada. Se
 > decide, y la respuesta se escribe en las Clarificaciones de `2_spec.md`
 > — no solo en el chat. El chat se cierra; la spec queda.
+
+### 7.3 Cómo se ajusta el prompt — y cuándo no se toca
+
+El prompt no se corrige cada vez que la IA falla. Cada error tiene **uno
+de tres destinos**, y confundirlos es lo que arruina un prompt:
+
+| Si el error es… | La corrección va a… | Cómo se reconoce |
+|---|---|---|
+| **La IA no podía saberlo**: la spec no lo dice, o lo dice de dos maneras | **La spec**, como una Clarificación nueva | Usted mismo duda al contestarle. Si tiene que pensar la respuesta, no estaba escrita |
+| **La spec lo dice, la IA lo ignoró — y vuelve a pasar** | **El prompt** | Se repite con otra IA, en otro chat, después de empezar de cero |
+| **La spec lo dice claro y la IA falló una vez** | **Usted**: le señala el documento y sigue | Al corregirlo, no vuelve a ocurrir |
+
+**La prueba del segundo destino es la repetición:** si el error aparece
+con otra IA y en otro chat empezando de cero, la causa está en lo que se
+le dio. Si no vuelve a aparecer, era ruido.
+
+> Si por cada tropiezo se agrega una regla, el prompt termina con treinta
+> y deja de leerse. **Un prompt que crece sin control dejó de funcionar.**
+
+**El cuarto camino, que nunca se toma:** arreglar el código para que
+funcione sin tocar la spec ni el prompt. Eso deja el documento diciendo
+una cosa y el sistema haciendo otra.
+
+#### Cómo se prueba, y cómo queda registrado
+
+1. Se le entregan a una IA los 8 documentos y el prompt tal cual, **sin
+   ayudarla**: cualquier aclaración que uno le dé por fuera falsea la
+   prueba, porque el estudiante no la va a tener.
+2. Se anota cada diferencia con lo que la spec pedía, y se clasifica en
+   uno de los tres destinos.
+3. **Los cambios al prompt se hacen citando la evidencia**: "esto se
+   agregó porque en la prueba del tal día, la IA hizo tal cosa". Un cambio
+   sin evidencia es una corazonada, y las corazonadas son las que inflan
+   los prompts.
+4. El resultado queda en un **informe de la prueba**, en el repositorio.
+   No en un chat: los chats se cierran.
 
 ## 8. Qué se copia, qué se adapta y qué se escribe de cero
 
