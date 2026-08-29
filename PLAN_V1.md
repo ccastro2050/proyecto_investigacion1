@@ -198,6 +198,105 @@ flowchart LR
 > credenciales. Es el mismo criterio con el que un cirujano practica en un
 > maniquí: la técnica es la misma, el maniquí no sangra.
 
+### 5.1 Cómo se registra la contraseña, y cómo se cambia
+
+La contraseña de esta plantilla es **`Aplicacionweb123!`**. SQL Server exige
+al menos 8 caracteres y tres de las cuatro categorías —mayúscula,
+minúscula, dígito y símbolo—; si no las cumple, el contenedor **no
+arranca** y el error no menciona la contraseña.
+
+No se "registra" en ninguna parte: **se le entrega al motor cuando nace.**
+SQL Server crea el usuario `sa` con lo que encuentre en la variable
+`MSSQL_SA_PASSWORD` la **primera vez** que se levanta.
+
+```yaml
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Aplicacionweb123!"   # aqui NACE el usuario sa
+```
+
+De ahí viaja a otros dos lugares del mismo archivo: el contenedor
+`sqlserver-init` —para que `sqlcmd` pueda entrar a crear la base— y la
+cadena de conexión que se le inyecta a la API:
+
+```yaml
+  api-investigacion:
+    environment:
+      ConnectionStrings__SqlServer: "Server=sqlserver,1433;Database=investigacion_local;User Id=sa;Password=Aplicacionweb123!;TrustServerCertificate=True;"
+```
+
+Ese **doble guion bajo** no es un adorno: ASP.NET Core traduce
+`ConnectionStrings__SqlServer` a la sección `ConnectionStrings:SqlServer`
+del `appsettings.json` y la **sobreescribe**. Por eso el `appsettings.json`
+puede quedar con un valor de desarrollo y el compose manda en tiempo de
+ejecución.
+
+```mermaid
+flowchart LR
+    CMP["docker-compose.yml<br/>MSSQL_SA_PASSWORD"] --> SRV["sqlserver<br/>crea el usuario sa al nacer"]
+    CMP --> INI["sqlserver-init<br/>sqlcmd entra a crear la base"]
+    CMP --> API["api-investigacion<br/>ConnectionStrings__SqlServer<br/>sobreescribe appsettings.json"]
+    SRV --> VOL[("volumen<br/>aqui queda guardado el sa")]
+```
+
+#### Cómo la cambia quien clone esto — y la trampa
+
+```powershell
+# 1. edita el docker-compose.yml y pone su propia clave
+# 2. y OBLIGATORIAMENTE:
+docker compose down -v        # -v borra el volumen: la BD olvida el sa viejo
+docker compose up -d --build
+```
+
+**Si solo cambia el compose y hace `up -d`, no funciona.** El usuario `sa`
+ya existe **dentro del volumen** con la clave vieja, y `MSSQL_SA_PASSWORD`
+solo se aplica cuando el motor nace. El síntoma es un `Login failed for
+user 'sa'` que no dice una palabra sobre volúmenes — y todo el mundo se va
+a revisar la cadena de conexión, que está bien.
+
+#### Cómo se hace en el proyecto de aula: con variables de entorno
+
+Tres archivos, y ningún secreto en el repositorio:
+
+**`.env`** — en la raíz, **nunca** a git:
+
+```
+MSSQL_SA_PASSWORD=Aplicacionweb123!
+```
+
+**`.env.example`** — sí va a git, con valor de mentira:
+
+```
+MSSQL_SA_PASSWORD=CambieEstaClave123!
+```
+
+**`docker-compose.yml`** — deja de tener el valor y lo pide:
+
+```yaml
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+      ConnectionStrings__SqlServer: "Server=sqlserver,1433;Database=investigacion_local;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;"
+```
+
+**Docker Compose lee el `.env` solo**, por estar en la misma carpeta: no
+hay que configurar nada. Para comprobar que resolvió bien:
+
+```powershell
+docker compose config     # muestra el compose con los valores ya puestos
+```
+
+> **Ojo con ese comando:** ahí la contraseña **sí se ve**. Sirve para
+> depurar, pero esa salida no se pega en un chat, ni en una captura, ni en
+> el informe. Es el mismo cuidado del comando de verificación del Paso 4,
+> que la lee de la variable en vez de escribirla.
+
+En la v4, cuando el sistema se publique, esas mismas variables se cargan en
+el **panel de variables de entorno del servicio** y el `.env` no viaja a
+ningún lado.
+
 ## 6. El plan, en 8 pasos
 
 ```mermaid
@@ -476,12 +575,16 @@ nombrándolos: el `Dockerfile` de la API todavía está vacío, así que un
 docker compose up -d sqlserver sqlserver-init
 
 # ¿quedaron las 19 tablas y los datos?
-docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd `
-  -S localhost -U sa -P "Paradigmas123!" -C -d investigacion_local `
-  -Q "SELECT 'area_conocimiento' t, COUNT(*) n FROM area_conocimiento
-      UNION ALL SELECT 'ODS', COUNT(*) FROM objetivo_desarrollo_sostenible
-      UNION ALL SELECT 'area_aplicacion', COUNT(*) FROM area_aplicacion
-      UNION ALL SELECT 'universidad', COUNT(*) FROM universidad"
+#   La clave NO se escribe en el comando: se toma de la variable que el
+#   propio contenedor ya tiene. Por eso va entre comillas simples y
+#   ejecutada por el bash de adentro — si se pusiera en comillas dobles,
+#   PowerShell intentaría resolverla aquí afuera, donde no existe.
+docker compose exec sqlserver bash -c '/opt/mssql-tools18/bin/sqlcmd `
+  -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -d investigacion_local `
+  -Q "SELECT ''area_conocimiento'' t, COUNT(*) n FROM area_conocimiento
+      UNION ALL SELECT ''ODS'', COUNT(*) FROM objetivo_desarrollo_sostenible
+      UNION ALL SELECT ''area_aplicacion'', COUNT(*) FROM area_aplicacion
+      UNION ALL SELECT ''universidad'', COUNT(*) FROM universidad"'
 ```
 
 **Verificación:** ese comando debe responder **218 · 17 · 21 · 6**, los
@@ -491,9 +594,12 @@ no está terminado.
 > **Ojo con la memoria:** SQL Server pide alrededor de 2 GB y tarda medio
 > minuto en arrancar. Conviene no tener otros proyectos encendidos.
 >
-> Y sí: esa contraseña está a la vista, en el compose y en el comando. Es
-> la excepción explicada en la sección 5 — **en el proyecto de aula eso
-> sería una falta grave**.
+> **Y una costumbre que sí se copia:** aunque esta plantilla tenga la
+> contraseña a la vista en el `docker-compose.yml` (la excepción de la
+> sección 5), **el comando no la repite**: la lee de la variable de
+> entorno del contenedor. Escribir un secreto en un comando lo manda al
+> historial de la terminal, a las capturas de pantalla y a los apuntes de
+> quien esté mirando. Cuesta lo mismo hacerlo bien.
 
 ### Paso 5 — La API
 C# / ASP.NET Core + Dapper, capas con interfaces, para `area_conocimiento`: el modelo, las tres peticiones (crear / reemplazo / actualizar), la interfaz y el repositorio, la interfaz y el servicio, y el controlador con los siete endpoints. Más `Program.cs` con el ensamblador, `Dockerfile` y el proyecto `pruebas/` con un repositorio falso en memoria. **Unos 12 archivos**, no 45: esa es la ganancia de haber escogido una sola tabla.
