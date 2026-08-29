@@ -31,7 +31,7 @@ flowchart TD
 - [ ] `docker-compose.yml` con los servicios `sqlserver` y
       `sqlserver-init`, montando `./db` como `/scripts`
 
-**Verificar:** `docker compose up -d sqlserver sqlserver-init`, y después
+**Verificar:** `docker compose up -d --build`, y después
 este conteo — **nombrando las tablas**, que si no, no se sabe cuál es cuál:
 
 | Tabla | Filas esperadas |

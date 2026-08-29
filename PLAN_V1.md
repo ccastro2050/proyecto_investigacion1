@@ -578,12 +578,12 @@ el motor **responda consultas** (no que "exista"), crea la base si no
 existe, corre el script y se muere. Es idempotente: correrlo mil veces no
 daña nada.
 
-En este paso se levantan **solo los dos servicios de base de datos**,
-nombrándolos: el `Dockerfile` de la API todavía está vacío, así que un
-`docker compose up` pelado fallaría al intentar construirla.
+El compose de esta fase declara **solo los dos servicios de base de
+datos** — la API entra en el Paso 5, cuando exista su `Dockerfile`. Por
+eso el comando es el de siempre, sin nombrar nada:
 
 ```powershell
-docker compose up -d sqlserver sqlserver-init
+docker compose up -d --build
 
 # ¿quedaron las 19 tablas y los datos?
 #   La clave NO se escribe en el comando: se toma de la variable que el

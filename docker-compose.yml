@@ -1,0 +1,61 @@
+# ==============================================================
+# Módulo INVESTIGACIÓN — versión 1
+#
+#   Navegador → API investigación (C#, :8070) → SQL Server (investigacion_local)
+#
+# Uso: docker compose up -d --build     (UN solo comando)
+# Reset de la BD: docker compose down -v && docker compose up -d
+#
+# En la v1 solo están los dos servicios de base de datos: el servicio
+# api-investigacion se agrega en la Fase 6 de 8_tasks.md, cuando exista
+# su Dockerfile. Este archivo CRECE con las versiones.
+#
+# Compose v2 ignora la directiva 'version:' y advierte que está obsoleta:
+# por eso no aparece.
+# ==============================================================
+services:
+
+  # --- SQL Server 2022: el único motor del proyecto ---
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: investigacion-sqlserver
+    restart: unless-stopped        # si se reinicia el PC, el motor revive solo
+    environment:
+      - ACCEPT_EULA=Y
+      # Contraseña a la vista: excepción declarada del Artículo 7 — esta es
+      # una plantilla didáctica que corre en contenedores desechables.
+      # En un proyecto real va en el .env, fuera de git.
+      - MSSQL_SA_PASSWORD=Aplicacionweb123!
+    ports:
+      - "11470:1433"               # 1433 es el puerto del motor adentro
+    volumes:
+      - mssqldata:/var/opt/mssql   # el directorio COMPLETO: datos, registros y secretos
+    healthcheck:
+      # No basta con que el contenedor exista: hay que saber si el motor ya
+      # RESPONDE consultas. El contenedor arranca en un segundo; el motor
+      # tarda entre 30 y 60 en aceptar conexiones.
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' -b"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 30s            # margen de gracia mientras arranca
+
+  # --- Inicializador: crea la base y corre el script UNA vez, y se muere ---
+  # SQL Server no ejecuta los scripts que se le monten: alguien tiene que
+  # conectarse y correrlos (decisión D-v1-6). Es idempotente: si la base ya
+  # existe, no hace nada.
+  sqlserver-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: investigacion-sqlserver-init
+    restart: "no"                  # corre una vez; no revive
+    environment:
+      - MSSQL_SA_PASSWORD=Aplicacionweb123!
+    volumes:
+      - ./db:/scripts:ro           # solo lectura: lo ejecuta, no lo modifica
+    depends_on:
+      sqlserver:
+        condition: service_healthy # espera a que el motor RESPONDA
+    entrypoint: ["/bin/bash", "/scripts/init.sh"]
+
+volumes:
+  mssqldata:                       # la "memoria" de la base: sobrevive a `down`
