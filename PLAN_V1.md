@@ -161,8 +161,52 @@ lo que se evalúa.
 ### Paso 1 — Esqueleto: primero las carpetas, después los archivos
 
 Todo desde la **terminal integrada de VS Code** (*Terminal → New Terminal*,
-PowerShell), parado en la raíz del proyecto. Primero el esqueleto de
-carpetas, con la misma forma que el molde del curso:
+PowerShell), parado en la raíz del proyecto.
+
+**Las carpetas no son manía de orden: SON la arquitectura.** Por eso se
+crean antes de escribir nada — la estructura queda decidida antes de
+programar, que es justo lo que evita el "después lo acomodo". Esto es lo
+que debe quedar:
+
+```
+proyecto_investigacion1/
+├── db/                                 ← el script y su inicializador (artefacto DADO)
+├── api_investigacion/
+│   ├── Controllers/                    ← CAPA 1: HTTP — códigos de estado y JSON
+│   ├── Peticiones/                     ← la frontera de entrada: valida el cuerpo → 422
+│   ├── Modelos/                        ← la entidad, lo que viaja entre capas
+│   ├── Servicios/                      ← CAPA 2: negocio — no conoce HTTP ni el motor
+│   ├── Repositorios/                   ← CAPA 3: datos — el SQL con Dapper
+│   ├── Excepciones/                    ← cómo el negocio avisa un 404 sin hablar de HTTP
+│   └── pruebas/                        ← el servicio con un repositorio FALSO, SIN base de datos
+├── docs/
+│   └── spec_kit/
+│       ├── 1_constitution.md           ← permanente: rige TODAS las versiones
+│       └── versiones/
+│           ├── 0_mapa_versiones.md     ← la ruta v1 → v4
+│           └── v1_area_conocimiento/   ← 2_spec … 8_tasks · 9_checklist · GUIA_IA1
+├── postman/                            ← la colección para probar con clics
+├── docker-compose.yml                  ← TODO el sistema declarado en un archivo
+├── README.md
+└── ProyectosDeAula/                    ← el material del curso: NO se toca
+```
+
+Las tres capas, en detalle, y las carpetas que se confunden con ellas:
+
+| Carpeta | Qué va adentro | Papel |
+|---|---|---|
+| `api_investigacion\Controllers` | Los endpoints | **Capa 1 — HTTP**: traduce a códigos de estado y JSON |
+| `api_investigacion\Peticiones` | Una clase por verbo (crear, reemplazo, actualizar) | La **frontera de entrada**: lo que valida el cuerpo y produce los 422 |
+| `api_investigacion\Modelos` | La entidad `AreaConocimiento` | Lo que viaja entre capas |
+| `api_investigacion\Servicios` | La interfaz y las reglas de negocio | **Capa 2 — negocio**: no conoce HTTP ni el motor |
+| `api_investigacion\Repositorios` | La interfaz y el SQL con Dapper | **Capa 3 — datos**: no conoce HTTP |
+| `api_investigacion\Excepciones` | `NoEncontradoExcepcion` | Cómo el negocio avisa un 404 sin hablar de HTTP |
+| `api_investigacion\pruebas` | La prueba de capas | Corre el servicio con un repositorio FALSO, **sin base de datos** |
+| `db` | El script y su inicializador | Artefacto **dado**: se copia, no se especifica |
+| `docs\spec_kit` | La constitución y las versiones | La fuente de verdad del proyecto |
+| `postman` | La colección | Probar los endpoints con clics |
+
+Primero el esqueleto de carpetas, con la misma forma que el molde:
 
 ```powershell
 mkdir db, postman,
@@ -180,7 +224,9 @@ rutas nuevas a mitad de camino.
 
 ```powershell
 # raíz del proyecto
-New-Item -ItemType File .gitignore, .gitattributes, docker-compose.yml, README.md
+#   (.gitignore y .gitattributes YA EXISTEN en este repositorio: no se
+#    vuelven a crear, se editan cuando toque)
+New-Item -ItemType File docker-compose.yml, README.md
 
 # la base de datos (paso 2)
 New-Item -ItemType File db\investigacion.sql, db\init.sh
@@ -225,25 +271,10 @@ New-Item -ItemType File postman\coleccion_v1.postman_collection.json
 > `-ItemType File` es obligatorio — sin él, PowerShell se queda preguntando
 > qué tipo de elemento quiere crear.
 
-El árbol que debe quedar:
-
-```mermaid
-flowchart TD
-    R["proyecto_investigacion1"] --> DB["db<br/>investigacion.sql · init.sh"]
-    R --> API["api_investigacion<br/>Controllers · Modelos · Peticiones<br/>Servicios · Repositorios · Excepciones · pruebas"]
-    R --> DOC["docs<br/>spec_kit"]
-    R --> PM["postman"]
-    R --> CMP["docker-compose.yml · README.md"]
-    R --> PDA["ProyectosDeAula<br/>el material del curso, intacto"]
-    DOC --> SK["spec_kit<br/>1_constitution.md"]
-    SK --> VS["versiones<br/>0_mapa_versiones.md"]
-    VS --> V1["v1_area_conocimiento<br/>2_spec a 8_tasks<br/>9_checklist · GUIA_IA1"]
-    classDef ajeno fill:#eee,stroke:#999
-    class PDA ajeno
-```
-
-**Verificación:** el árbol se ve como el de `aplicacion_y_servicios_web1`,
-y todos los archivos existen aunque estén vacíos.
+**Verificación:** deben quedar **13 carpetas** y **32 archivos nuevos**, y
+`git status` los debe listar a todos. Ninguno tiene contenido: el paso 1
+termina con 32 archivos de 0 bytes. Si alguno trae algo adentro, se
+ejecutó de más.
 
 ### Paso 2 — La base de datos viva
 `db/investigacion.sql` = el DDL dado **+ las cuatro correcciones + `activo`** en las 16 tablas del módulo **+ las semillas extraídas del Excel** (218 · 17 · 21 · 6). Cada corrección documentada en la cabecera del propio script. Más `db/init.sh` (el inicializador de SQL Server, que el motor no ejecuta solo) y el `docker-compose.yml` con los tres servicios.
