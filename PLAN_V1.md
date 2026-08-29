@@ -138,25 +138,89 @@ el del front, que todavía no existe— para que ninguna versión futura los pis
 > curso, el segundo que arranque falla — y el error no se parece en nada a
 > un choque de puertos, así que se pierden horas buscando donde no es.
 
-## 5. El plan, en 8 pasos
+## 5. Los secretos: por qué este ejemplo los lleva a la vista y el suyo NO
+
+Hay que decir esto antes de que alguien copie lo que no debe.
+
+**La regla del proyecto de aula** está en la sección 5 de
+`0_METODOLOGIA.md` y no admite matices: ningún secreto —la cadena de
+conexión, la contraseña de la base, el secreto de firma del JWT— va
+escrito en el código ni en archivos versionados. En la rúbrica, **un
+secreto quemado anula el criterio de seguridad de la versión completa**.
+
+**Y sin embargo este ejemplo va a llevar la contraseña de SQL Server
+escrita en el `docker-compose.yml`.** A propósito, y por la misma razón
+que la llevan `web1` … `web4`:
+
+| | Este ejemplo | El proyecto de aula de ustedes |
+|---|---|---|
+| Qué es | Una **plantilla didáctica** | Un sistema **real** |
+| Dónde corre | En su PC, en contenedores de juguete | En su PC **y en un servidor público desde la v4** |
+| Quién lo ve | Quien clona el repositorio del curso | Cualquiera en internet |
+| Qué se busca | Que un `git clone` y **un solo comando** basten, sin configurar nada antes | Que el sistema sea defendible |
+| Los secretos | A la vista, acotados y desechables | **Variables de entorno, siempre** |
+
+La contraseña de este ejemplo es de juguete: sirve para un contenedor que
+se borra con `docker compose down -v` y se recrea idéntico. No protege
+nada. Ponerla en un `.env` solo agregaría un paso antes del "un solo
+comando", que es justo lo que la plantilla quiere demostrar.
+
+**En el proyecto de aula eso no aplica**, porque en la v4 se publica. Ahí
+la regla va completa desde la v1:
+
+```mermaid
+flowchart LR
+    subgraph EJ["Este ejemplo — plantilla didactica"]
+        C1["docker-compose.yml<br/>la clave escrita ahi"] --> S1["contenedor de juguete<br/>se borra y se recrea"]
+    end
+    subgraph PA["El proyecto de aula — sistema real"]
+        E[".env<br/>valores reales, NO va a git"] --> C2["docker-compose.yml<br/>lee las variables"]
+        X[".env.example<br/>valores de mentira, SI va a git"] -.->|"plantilla para el que clona"| E
+        C2 --> S2["servidor publico en la v4<br/>variables en el panel del servicio"]
+    end
+    classDef malo fill:#fdd,stroke:#c33,stroke-width:2px
+    class E malo
+```
+
+1. El código lee los secretos de **variables de entorno**
+   (`DB_CONNECTION`, `JWT_SECRET`, …).
+2. El `.env` **nunca** se sube: va en el `.gitignore` desde el primer
+   commit. (En este repositorio ya está puesto, aunque el ejemplo no lo
+   use: higiene desde el día uno.)
+3. El repositorio **sí** incluye un `.env.example` con valores de mentira,
+   para que cualquiera sepa qué configurar.
+4. En el servidor de la v4, los secretos se cargan en el panel de
+   variables de entorno del servicio — jamás en el código desplegado.
+5. **Si un secreto se sube por error, se ROTA.** Borrarlo del último
+   commit no sirve: quedó en la historia y ahí lo encuentra cualquiera.
+
+> **La frase para clase:** de este ejemplo se copia el **método**, no las
+> credenciales. Es el mismo criterio con el que un cirujano practica en un
+> maniquí: la técnica es la misma, el maniquí no sangra.
+
+## 6. El plan, en 8 pasos
 
 ```mermaid
 flowchart TD
-    P1["Paso 1 — Esqueleto"] --> P2["Paso 2 — La base de datos viva"]
-    P2 --> P3["Paso 3 — Constitucion y mapa de versiones"]
-    P3 --> P4["Paso 4 — El spec kit de la v1"]
-    P4 --> G{"Compuerta<br/>el 9_checklist en verde"}
-    G -->|"en rojo, se vuelve a la spec"| P4
-    G -->|"en verde"| P5["Paso 5 — La API"]
-    P5 --> P6["Paso 6 — Un comando y smoke test"]
+    P1["Paso 1 — Esqueleto<br/>(hecho)"] --> P2["Paso 2 — LOS DOCUMENTOS<br/>constitucion, mapa y spec kit de la v1"]
+    P2 --> G{"Compuerta<br/>el 9_checklist en verde"}
+    G -->|"en rojo, se vuelve a la spec"| P2
+    G -->|"en verde"| P3["Paso 3 — La base de datos"]
+    P3 --> P4["Paso 4 — Docker: un solo comando"]
+    P4 --> P5["Paso 5 — La API"]
+    P5 --> P6["Paso 6 — Smoke test"]
     P6 --> P7["Paso 7 — Postman, README y conceptos"]
     P7 --> P8["Paso 8 — Cierre y tag v1"]
     classDef compuerta fill:#fde7c8,stroke:#c07a24,stroke-width:2px
+    classDef hecho fill:#e8f5e9,stroke:#4a7
     class G compuerta
+    class P1 hecho
 ```
 
-**Nada de código antes de la compuerta.** Ese es el orden del método, y es
-lo que se evalúa.
+**Primero se escribe TODO lo que se va a construir, y solo después se
+construye.** No hay base de datos, ni Docker, ni una línea de código antes
+de que el `9_checklist.md` esté en verde. Ese es el orden del método, y es
+lo que se evalúa en la rúbrica.
 
 ### Paso 1 — Esqueleto: primero las carpetas, después los archivos
 
@@ -336,10 +400,82 @@ ProyectosDeAula/docs/_originales_no_subir/
 los debe listar a todos. Si algún archivo nuevo trae contenido, se ejecutó
 de más.
 
-### Paso 2 — La base de datos viva
-`db/investigacion.sql` = el DDL dado **+ las cuatro correcciones + `activo`** en las 16 tablas del módulo **+ las semillas extraídas del Excel** (218 · 17 · 21 · 6). Cada corrección documentada en la cabecera del propio script. Más `db/init.sh` (el inicializador de SQL Server, que el motor no ejecuta solo) y el `docker-compose.yml` con los tres servicios.
+### Paso 2 — Los documentos: primero se escribe lo que se va a construir
+
+**Ni una línea de código, ni un contenedor, ni una tabla.** En este paso
+solo se llenan archivos `.md`, y salen de la documentación del proyecto de
+aula: `modulo_investigacion.md` dice el QUÉ y `0_METODOLOGIA.md` dice CÓMO
+se trabaja.
+
+| Archivo | De dónde sale |
+|---|---|
+| `docs/spec_kit/1_constitution.md` | Las reglas permanentes: stack, las tres capas con interfaces, español, **borrado lógico**, la regla de secretos (§5), un solo comando y los puertos (§4) |
+| `docs/spec_kit/versiones/0_mapa_versiones.md` | La ruta v1→v4 que ya define `modulo_investigacion.md`, con el estado de cada versión |
+| `v1_area_conocimiento/2_spec.md` | El QUÉ de la v1: propósito, alcance con su NO incluye, requisitos, criterios medibles, **Clarificaciones** y definición de TERMINADA |
+| `…/3_plan.md` | El CÓMO: estructura, diseño de las capas y el **Chequeo de constitución** |
+| `…/4_research.md` | Las decisiones, cada una con la alternativa que se descartó |
+| `…/5_data_model.md` | La tabla con sus columnas ya corregidas, las semillas exactas y quién tiene prohibido escribir qué |
+| `…/6_contracts.md` | Los endpoints con TODOS sus códigos de respuesta, incluidos los de error |
+| `…/7_quickstart.md` | El arranque y el smoke test, comando por comando |
+| `…/8_tasks.md` | Las fases de construcción, cada una con su "Verificar:" |
+| `…/9_checklist.md` | La lista con la que se revisa esta spec antes de programar |
+| `…/GUIA_IA1.md` | Cómo reconstruir la v1 con ayuda de IA |
+
+Las **tres compuertas** quedan puestas aquí:
+
+- **Clarificaciones** en `2_spec.md`: los hallazgos **1, 2 y 4** de la
+  sección 2 —los que tocan a `area_conocimiento`— cada uno con su
+  pregunta, su respuesta y su razón. Ninguna inventada. Los hallazgos 3, 6
+  y 7 quedan anotados para las versiones que usen esas tablas.
+- **Chequeo de constitución** en `3_plan.md`, artículo por artículo.
+- **`9_checklist.md`**, para firmar antes de programar.
+
+> **¿Y los números del smoke test, si la base de datos todavía no existe?**
+> Salen del Excel de referencia, que ya se revisó: 218 áreas de
+> conocimiento, 17 ODS, 21 áreas de aplicación y 6 universidades. Se
+> escriben en la spec porque **están verificados en la fuente**, y el Paso
+> 4 los confirma contra la base ya cargada. Escribir cifras sin haberlas
+> mirado sería justo lo que el método prohíbe.
+
+**Verificación:** el `9_checklist.md` pasa en verde y lo firma una persona.
+**Este es el paso que hay que revisar antes de seguir**, y el único que no
+se puede saltar: si la spec está mal, el error se multiplica en todo lo que
+viene después.
+
+### Paso 3 — La base de datos
+
+Recién ahora se toca el motor, y solo para escribir dos archivos.
+`db/investigacion.sql` = el DDL dado **+ las cuatro correcciones +
+`activo`** en las 16 tablas del módulo **+ las semillas del Excel**, con
+cada corrección documentada en la cabecera del propio script. Más
+`db/init.sh`, el inicializador.
+
+> La base de datos se crea **completa, con sus 19 tablas**, aunque la v1
+> solo toque una. Es la regla del molde: la BD es infraestructura **dada**
+> y lo que crece por versiones es la API. Lo que la spec sí prohíbe es que
+> el código de la v1 **nombre** cualquier otra tabla.
+
+**Verificación:** el script se lee de arriba abajo y sus conteos declarados
+coinciden con los que el `5_data_model.md` escribió en el Paso 2. Todavía
+no se ejecuta nada: eso es el Paso 4.
+
+### Paso 4 — Docker: un solo comando
+
+`docker-compose.yml` con los tres servicios: SQL Server, el inicializador y
+la API.
+
+Un detalle de SQL Server que vale la pena explicar: **no ejecuta los
+scripts que uno le monte**. PostgreSQL y MariaDB sí; SQL Server no. Por eso
+existe `sqlserver-init`: un contenedor que espera a que el motor **responda
+consultas** (no que "exista"), crea la base si no existe, corre el script y
+se muere. Es idempotente: correrlo mil veces no daña nada.
+
+En este paso se levantan **solo los dos servicios de base de datos**,
+nombrándolos: el `Dockerfile` de la API todavía está vacío, así que un
+`docker compose up` pelado fallaría al intentar construirla.
+
 ```powershell
-docker compose up -d          # levanta SQL Server y corre el inicializador
+docker compose up -d sqlserver sqlserver-init
 
 # ¿quedaron las 19 tablas y los datos?
 docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd `
@@ -350,31 +486,16 @@ docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd `
       UNION ALL SELECT 'universidad', COUNT(*) FROM universidad"
 ```
 
-**Verificación:** ese comando debe responder **218 · 17 · 21 · 6**. Si un
-número no cuadra, el paso no está terminado.
+**Verificación:** ese comando debe responder **218 · 17 · 21 · 6**, los
+mismos números que la spec escribió en el Paso 2. Si uno no cuadra, el paso
+no está terminado.
 
-> Va **antes** de la spec a propósito: en este método `db/` es un
-> **artefacto dado** (se copia, no se especifica), y la spec necesita los
-> conteos exactos para escribir el smoke test.
+> **Ojo con la memoria:** SQL Server pide alrededor de 2 GB y tarda medio
+> minuto en arrancar. Conviene no tener otros proyectos encendidos.
 >
-> La base de datos se crea **completa, con sus 19 tablas**, aunque la v1
-> solo toque una. Es la misma regla del ejemplo del curso: la BD es
-> infraestructura dada, y lo que crece por versiones es la API. Lo que la
-> spec sí prohíbe es que el código de la v1 **nombre** cualquier otra
-> tabla.
-
-### Paso 3 — Constitución y mapa de versiones
-`docs/spec_kit/1_constitution.md` del módulo (stack, capas con interfaces, español, borrado lógico, un solo comando, puertos) y `versiones/0_mapa_versiones.md` con las 4 versiones que ya define `modulo_investigacion.md`.
-**Verificación:** cada artículo se puede citar para zanjar una discusión sin abrir el código.
-
-### Paso 4 — El spec kit de la v1, ANTES de una línea de código
-En `docs/spec_kit/versiones/v1_area_conocimiento/`: los documentos `2_spec` a `8_tasks`, el `9_checklist.md` y la `GUIA_IA1.md`. Con las tres compuertas puestas:
-
-- **Clarificaciones** en `2_spec.md`: los hallazgos **1, 2 y 4** de la sección 2, que son los que tocan a `area_conocimiento`, cada uno con su pregunta, su respuesta y su razón. No hay ninguna inventada. Los hallazgos 3, 6 y 7 quedan anotados para las versiones que usen esas tablas.
-- **Chequeo de constitución** en `3_plan.md`, artículo por artículo.
-- **`9_checklist.md`** para firmar antes de programar.
-
-**Verificación:** el checklist pasa en verde. **Este es el paso que hay que revisar antes de seguir** — es la regla del propio método.
+> Y sí: esa contraseña está a la vista, en el compose y en el comando. Es
+> la excepción explicada en la sección 5 — **en el proyecto de aula eso
+> sería una falta grave**.
 
 ### Paso 5 — La API
 C# / ASP.NET Core + Dapper, capas con interfaces, para `area_conocimiento`: el modelo, las tres peticiones (crear / reemplazo / actualizar), la interfaz y el repositorio, la interfaz y el servicio, y el controlador con los siete endpoints. Más `Program.cs` con el ensamblador, `Dockerfile` y el proyecto `pruebas/` con un repositorio falso en memoria. **Unos 12 archivos**, no 45: esa es la ganancia de haber escogido una sola tabla.
@@ -436,7 +557,7 @@ git push origin main --tags
 **Verificación:** el tag `v1` aparece en GitHub y el repositorio clonado en
 limpio levanta con un solo comando.
 
-## 6. El prompt para construir la v1
+## 7. El prompt para construir la v1
 
 El paso 5 no se hace a pulso: se construye con IA, **siguiendo la spec**.
 Hay dos caminos y el prompt cambia según cuál se use. En ambos vale la
@@ -452,7 +573,7 @@ flowchart LR
     D --> E
 ```
 
-### 6.1 Camino A — chat web (Gemini, DeepSeek, ChatGPT…)
+### 7.1 Camino A — chat web (Gemini, DeepSeek, ChatGPT…)
 
 Se le suben **8 documentos**: `1_constitution.md` y los siete de
 `v1_area_conocimiento/` (`2_spec` a `8_tasks`). El `9_checklist.md` **no**
@@ -512,7 +633,7 @@ Empieza: resume en máximo 10 líneas qué vamos a construir (para confirmar
 que entendiste el alcance) y luego arranca con la Fase 0.
 ```
 
-### 6.2 Camino B — IDE agéntico (Antigravity, Cursor, Claude Code…)
+### 7.2 Camino B — IDE agéntico (Antigravity, Cursor, Claude Code…)
 
 Aquí no se sube nada: el agente **lee la carpeta**. El prompt es más corto
 porque el contexto ya está en el disco.
@@ -554,7 +675,7 @@ REGLAS (no negociables):
 > decide, y la respuesta se escribe en las Clarificaciones de `2_spec.md`
 > — no solo en el chat. El chat se cierra; la spec queda.
 
-## 7. Qué se copia, qué se adapta y qué se escribe de cero
+## 8. Qué se copia, qué se adapta y qué se escribe de cero
 
 Si de todo este plan hay que quedarse con una sola tabla, es esta:
 
@@ -566,13 +687,13 @@ Si de todo este plan hay que quedarse con una sola tabla, es esta:
 contenido. La carpeta `api_facturas/` es lo de menos; lo que se copia es
 `docs/`.
 
-## 8. Riesgos
+## 9. Riesgos
 
 - **El paso 5 es el largo** (~45 archivos). Conviene revisar el paso 4 antes, porque un error en la spec se multiplica por seis tablas.
 - **Las semillas pueden traer sorpresas** además de las ya detectadas (tildes, filas fantasma). Los conteos se verifican contra el documento del módulo y **cualquier diferencia se reporta, no se acomoda**.
-- **Los secretos**: este ejemplo llevará la contraseña quemada, como los repos del curso. El módulo exige `.env` a los equipos, así que la constitución del ejemplo debe decir explícitamente que **esa parte no se copia**.
+- **Los secretos**: este ejemplo lleva la contraseña a la vista, como plantilla didáctica que es (sección 5). El riesgo real es que alguien copie **esa** parte: por eso la excepción queda escrita en la constitución del ejemplo, en el `README.md` y en el propio `docker-compose.yml`, no solo aquí.
 
-## 9. Estado
+## 10. Estado
 
 Nada ejecutado. A la espera del visto bueno sobre las decisiones A, B, C y D
 de la sección 3.
