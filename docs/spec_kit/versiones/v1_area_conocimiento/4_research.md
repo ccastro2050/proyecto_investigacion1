@@ -103,6 +103,37 @@ consultas**, crea la base si no existe, corre el script y se muere.
 **Consecuencias.** Un servicio más en el compose, que termina en segundos y
 es idempotente. **Estado:** vigente.
 
+## D-v1-8 — Los campos JSON en camelCase
+
+**Contexto.** Las columnas de la base son `gran_area`, `area`,
+`disciplina`. ¿El JSON las repite tal cual, o usa la convención de C#?
+
+**Alternativas.** (a) **snake_case** en el JSON, igual que la base: un
+`SELECT` y una respuesta se leen igual. (b) **camelCase**, que es lo que
+ASP.NET Core hace por defecto.
+
+**Decisión: (b).** Tres razones, en orden de peso:
+
+1. **Es el comportamiento por defecto**: cero configuración. Lo que no se
+   configura no se puede configurar mal, y una política de serialización
+   mal puesta rompe TODOS los endpoints a la vez, con un síntoma
+   desconcertante — un `POST` correcto respondiendo "falta el campo".
+2. **El JSON no es una ventana a la tabla.** La API es una frontera: si
+   mañana la columna se renombra, el contrato no tiene por qué cambiar. El
+   parecido con la base es una coincidencia cómoda, no un requisito.
+3. **El front de la v4 lo consume directo.** `granArea` es lo que espera
+   quien escribe JavaScript.
+
+**Consecuencias.** El JSON deja de parecerse a la tabla, y hay que
+traducir mentalmente al leer el repositorio. A cambio, `Program.cs` no
+lleva ni una línea de configuración de serialización.
+
+**De dónde salió esta decisión.** El `6_contracts.md` tenía las dos
+convenciones mezcladas —`gran_area` en los cuerpos y `filasAfectadas` en
+las respuestas de escritura—, y eso solo se descubrió al escribir la
+primera clase de petición: era imposible cumplir las dos a la vez.
+**Estado:** vigente.
+
 ## D-v1-7 — El catálogo se corrige antes de sembrarlo
 
 **Contexto.** El Excel trae `Cienias Naturales` (sin la `c`) en 48 filas.

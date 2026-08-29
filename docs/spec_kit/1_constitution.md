@@ -114,11 +114,22 @@ fuera de git y un `.env.example` adentro. En la rúbrica, un secreto
 quemado **anula el criterio de seguridad de la versión**.
 
 **Y este proyecto es la excepción, declarada.** Aquí la contraseña de SQL
-Server está escrita en el `docker-compose.yml`, a propósito, porque este
-repositorio es una **plantilla didáctica**: corre en contenedores de
-juguete que se borran con `docker compose down -v`, nunca se despliega, y
-su gracia es que un `git clone` y **un solo comando** basten sin
-configurar nada antes.
+Server está escrita en **dos archivos versionados**, a propósito:
+
+- el `docker-compose.yml`, que se la entrega a los contenedores;
+- el `appsettings.json`, en la cadena de desarrollo — la que permite
+  correr la API sin Docker. En Docker esa cadena la sobreescribe la
+  variable de entorno, así que el valor del archivo solo sirve fuera.
+
+Está así porque este repositorio es una **plantilla didáctica**: corre en
+contenedores de juguete que se borran con `docker compose down -v`, nunca
+se despliega, y su gracia es que un `git clone` y **un solo comando**
+basten sin configurar nada antes.
+
+Y conviene ver el precio de la excepción: **una contraseña repartida en dos
+archivos es una contraseña que ya nadie sabe dónde está.** Con dos son
+cuatro sitios donde cambiarla; con un `.env`, uno solo. Eso es
+exactamente lo que se gana al hacerlo bien.
 
 **¿Y cómo sabe la contraseña quien clone esto?** Para *correr* el sistema
 no la necesita: el compose se la entrega a los contenedores y basta con

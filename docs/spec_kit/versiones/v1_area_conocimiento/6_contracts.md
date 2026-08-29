@@ -16,10 +16,24 @@
 
 ```json
 { "estado": 422, "mensaje": "Datos inválidos.", "detalle": "…",
-  "errores": ["El campo gran_area es obligatorio."] }
+  "errores": ["El campo granArea es obligatorio."] }
 ```
 
 `errores[]` aparece **solo** en el 422.
+
+**Los nombres de los campos JSON van en camelCase** (`granArea`,
+`filasAfectadas`), que es lo que ASP.NET Core hace **por defecto**: no hay
+que configurar nada, y por lo tanto no hay nada que se pueda configurar mal.
+
+> **Ojo con la diferencia entre la ruta y el cuerpo.** La ruta es
+> `/api/area_conocimiento` —con guion bajo, porque nombra la tabla
+> (Artículo 10)— y el cuerpo usa `granArea`. No es una inconsistencia: la
+> ruta identifica **el recurso**, y el JSON sigue la convención de quien lo
+> consume. El front de la v4 va a leer `granArea` sin traducir nada.
+>
+> Y algo que se ve mejor así: **el JSON no es una ventana a la tabla.** Si
+> mañana la columna se renombra, el contrato no tiene por qué cambiar —
+> justamente porque no son lo mismo.
 
 **Catálogo de códigos** (Artículo 10):
 
@@ -50,7 +64,7 @@ de contrato — es que la API no está arriba.
 ```
 GET /api/area_conocimiento
 → 200 { "tabla":"area_conocimiento", "limite":1000, "total":218,
-        "datos":[ {"id":"1A01","gran_area":"Ciencias Naturales",
+        "datos":[ {"id":"1A01","granArea":"Ciencias Naturales",
                    "area":"Matemáticas","disciplina":"Matemáticas puras"}, … ] }
 
 GET /api/area_conocimiento?limite=3
@@ -67,7 +81,7 @@ en la respuesta**: es un detalle interno, no parte del catálogo.
 
 ```
 GET /api/area_conocimiento/1A01
-→ 200 { "id":"1A01", "gran_area":"Ciencias Naturales",
+→ 200 { "id":"1A01", "granArea":"Ciencias Naturales",
         "area":"Matemáticas", "disciplina":"Matemáticas puras" }
 
 GET /api/area_conocimiento/9Z99          ← no existe
@@ -83,13 +97,13 @@ Cuerpo (petición `AreaConocimientoCrear` — los cuatro obligatorios):
 
 ```
 POST /api/area_conocimiento
-body {"id":"9Z01","gran_area":"Ciencias Naturales",
+body {"id":"9Z01","granArea":"Ciencias Naturales",
       "area":"Matemáticas","disciplina":"Teoría de números"}
 → 200 { "estado":200, "mensaje":"Área de conocimiento creada exitosamente." }
 
-body {"id":"9Z01","area":"Matemáticas"}        ← falta gran_area y disciplina
+body {"id":"9Z01","area":"Matemáticas"}        ← falta granArea y disciplina
 → 422 { "estado":422, "mensaje":"Datos inválidos.",
-        "errores":["El campo gran_area es obligatorio.",
+        "errores":["El campo granArea es obligatorio.",
                    "El campo disciplina es obligatorio."] }
 
 body {"id":"DEMASIADOLARGO", …}                ← el id excede 6 caracteres
@@ -106,11 +120,11 @@ llega, se ignora (§4 del modelo de datos).
 
 ```
 PUT /api/area_conocimiento/9Z01
-body {"gran_area":"Humanidades","area":"Filosofía","disciplina":"Ética"}
+body {"granArea":"Humanidades","area":"Filosofía","disciplina":"Ética"}
 → 200 { "estado":200, "mensaje":"Área de conocimiento reemplazada.",
         "filasAfectadas":1 }
 
-body {"gran_area":"Humanidades","disciplina":"Ética"}   ← falta area
+body {"granArea":"Humanidades","disciplina":"Ética"}   ← falta area
 → 422 { …, "errores":["El campo area es obligatorio."] }
 
 PUT /api/area_conocimiento/9Z99                          ← no existe
@@ -128,7 +142,7 @@ body {"disciplina":"Ética aplicada"}          ← solo lo que cambia
 → 200 { "estado":200, "mensaje":"Área de conocimiento actualizada.",
         "filasAfectadas":1 }
 
-body {"gran_area":"Humanidades","disciplina":"Ética"}   ← el MISMO cuerpo que
+body {"granArea":"Humanidades","disciplina":"Ética"}   ← el MISMO cuerpo que
                                                           el PUT rechazó
 → 200                                                   ← aquí es válido
 

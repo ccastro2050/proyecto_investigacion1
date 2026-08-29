@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Referencia directa al proyecto principal para probar la capa de servicio y sus modelos -->
+    <ProjectReference Include="..\ApiInvestigacion.csproj" />
+  </ItemGroup>
+
+</Project>

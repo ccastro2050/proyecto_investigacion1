@@ -57,5 +57,25 @@ services:
         condition: service_healthy # espera a que el motor RESPONDA
     entrypoint: ["/bin/bash", "/scripts/init.sh"]
 
+  # --- La API: C# / ASP.NET Core, con el codigo montado y dotnet watch ---
+  api-investigacion:
+    build: ./api_investigacion
+    container_name: investigacion-api
+    restart: unless-stopped
+    ports:
+      - "8070:8070"                # el MISMO numero adentro y afuera
+    volumes:
+      - ./api_investigacion:/app   # el codigo montado: guardar un .cs recompila solo
+      - /app/bin                   # bin y obj quedan DENTRO del contenedor (Linux),
+      - /app/obj                   #   sin mezclarse con los compilados de Windows
+    environment:
+      # El host es el NOMBRE del servicio, no localhost: dentro de la red de compose
+      # los servicios se resuelven por nombre. El doble guion bajo hace que ASP.NET
+      # lea esto como ConnectionStrings:SqlServer y SOBREESCRIBA appsettings.json.
+      - ConnectionStrings__SqlServer=Server=sqlserver,1433;Database=investigacion_local;User Id=sa;Password=Aplicacionweb123!;TrustServerCertificate=True;
+    depends_on:
+      sqlserver-init:
+        condition: service_completed_successfully   # espera a que la base este SEMBRADA
+
 volumes:
   mssqldata:                       # la "memoria" de la base: sobrevive a `down`

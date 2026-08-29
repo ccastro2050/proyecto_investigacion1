@@ -51,6 +51,23 @@ api_investigacion/
 **Ninguna carpeta nueva.** Si al construir aparece la necesidad de una, es
 señal de que el plan está incompleto: se corrige aquí, no en el código.
 
+> **`pruebas/` está adentro pero NO es parte de la API.** El SDK Web
+> compila todos los `.cs` que encuentre bajo su carpeta, así que sin decirle
+> lo contrario el repositorio de mentiras terminaría **publicado dentro del
+> sistema real**. El `.csproj` de la API lo excluye:
+>
+> ```xml
+> <ItemGroup>
+>   <Compile Remove="pruebas/**" />
+>   <Content Remove="pruebas/**" />
+>   <None Remove="pruebas/**" />
+> </ItemGroup>
+> ```
+>
+> El síntoma cuando falta: `warning CS0436` — "el tipo X está en conflicto
+> con el tipo importado X". Es una advertencia, no un error, así que pasa
+> desapercibida.
+
 ## 3. Arquitectura en capas: el viaje de una petición
 
 ```mermaid
@@ -168,6 +185,99 @@ flowchart LR
 
 Por eso el criterio 7 no es un adorno: es el único que verifica la
 arquitectura en vez de verificar la funcionalidad.
+
+### 4.7 Quién traduce la petición en entidad
+
+Las clases de `Peticiones/` **no cruzan a la capa 2**. El servicio y el
+repositorio solo conocen `Modelos/`.
+
+```mermaid
+flowchart LR
+    P["Peticiones/<br/>AreaConocimientoCrear"] --> C["Controller<br/>CAPA 1"]
+    C -->|"construye la entidad"| M["Modelos/<br/>AreaConocimiento"]
+    M --> S["Servicio<br/>CAPA 2"]
+    S --> R["Repositorio<br/>CAPA 3"]
+    classDef http fill:#fde7c8,stroke:#c07a24
+    class P,C http
+```
+
+**El controlador es el traductor.** Recibe la petición ya validada por el
+framework, y de ahí arma lo que la capa 2 entiende: una entidad para
+`Crear` y `Reemplazar`, o los tres campos sueltos para `ActualizarParcial`.
+
+**Por qué importa.** Una petición describe **el cuerpo de una llamada
+HTTP**: qué campos son obligatorios en un `POST`, cuáles opcionales en un
+`PATCH`. Eso es forma del protocolo, no del negocio. Si el servicio
+recibiera `AreaConocimientoCrear`, cambiar la forma del cuerpo obligaría a
+tocar la capa 2 — que no debería enterarse de que existe HTTP (Artículo 3).
+
+La señal para detectarlo es de una línea: **si en `Servicios/` o en
+`Repositorios/` aparece un `using` de `Peticiones`, la capa está rota.**
+
+### 4.8 SQL compuesto no es SQL concatenado
+
+El `PATCH` escribe **solo los campos que llegaron**, así que su `UPDATE` no
+se puede escribir de antemano: hay ocho combinaciones posibles. Se compone:
+
+```csharp
+var sql = $"UPDATE area_conocimiento SET {string.Join(", ", asignaciones)} WHERE id = @Id AND activo = 1";
+```
+
+**Eso parece violar el Artículo 2, y no lo viola.** La diferencia está en
+QUÉ se compone:
+
+| | Ejemplo | ¿Es seguro? |
+|---|---|---|
+| **Nombres de columna** de una lista cerrada que escribimos nosotros | `"gran_area = @GranArea"` | **Sí.** Ninguna de esas cadenas viene de afuera: están escritas en el código, una por campo |
+| **Valores** que llegan del cliente | `$"... WHERE id = '{id}'"` | **Nunca.** Eso es inyección esperando turno |
+
+La regla, en una línea: **la forma de la consulta puede componerse; los
+datos, jamás.** Los valores viajan siempre como `@parametro`, incluso en el
+SQL compuesto — por eso ahí se usan `DynamicParameters`.
+
+**Cómo revisarlo en un Pull Request:** busque una interpolación o un `+`
+dentro de una cadena SQL y pregunte de dónde sale lo que se pega. Si sale
+de una lista escrita en el código, está bien. Si sale de un argumento del
+método, está mal.
+
+### 4.9 El 422 no sale solo: hay que configurarlo
+
+El contrato exige que un cuerpo inválido responda **422** con el sobre
+`{estado, mensaje, errores[]}`. **ASP.NET no hace eso por defecto.**
+
+Con `[ApiController]`, cuando una anotación falla el framework corta la
+petición **antes de entrar al método** y responde un **400** con
+`ValidationProblemDetails`, que es otro formato. O sea: las anotaciones
+funcionan, pero la respuesta no cumple el contrato — y no hay un `catch`
+donde arreglarlo, porque el código del controlador nunca se ejecuta.
+
+Se corrige en `Program.cs`, reemplazando la fábrica de respuestas:
+
+```csharp
+builder.Services.Configure<ApiBehaviorOptions>(opciones =>
+{
+    opciones.InvalidModelStateResponseFactory = contexto =>
+    {
+        var errores = contexto.ModelState
+            .Where(e => e.Value?.Errors.Count > 0)
+            .SelectMany(e => e.Value!.Errors.Select(x => x.ErrorMessage))
+            .ToList();
+
+        return new ObjectResult(new
+        {
+            estado = 422,
+            mensaje = "Datos inválidos.",
+            errores
+        })
+        { StatusCode = 422 };
+    };
+});
+```
+
+**Por qué importa tanto:** de los siete criterios de aceptación, el 4 y el
+6 dependen del 422 — el contraste `PUT` 422 vs `PATCH` 200, y la
+validación como frontera. Sin estas líneas, ambos fallan, y el síntoma es
+confuso: la validación *sí* funciona, pero responde 400 con otro cuerpo.
 
 ## 5. Docker: un solo comando
 

@@ -54,13 +54,13 @@ otros nombres.
 - Inexistente **o inactiva** → 404.
 
 ### RF3 — Crear (POST + cuerpo completo)
-`POST /api/area_conocimiento` con `{id, gran_area, area, disciplina}`.
+`POST /api/area_conocimiento` con `{id, granArea, area, disciplina}`.
 - Los cuatro campos son obligatorios.
 - Nace con `activo = 1`.
 - Código ya existente → **500** (ver C8: por qué 500 y no 409).
 
 ### RF4 — Reemplazar (PUT + cuerpo completo)
-`PUT /api/area_conocimiento/{id}` con `{gran_area, area, disciplina}`.
+`PUT /api/area_conocimiento/{id}` con `{granArea, area, disciplina}`.
 - **Los tres campos son obligatorios**: es un reemplazo. Falta uno → 422.
 - Devuelve `filasAfectadas`; inexistente → 404.
 
@@ -102,7 +102,7 @@ otros nombres.
    `{tabla:"area_conocimiento", total:218, …}` y
    `GET /api/area_conocimiento?limite=3` devuelve **exactamente 3**.
 3. **Obtener.** `GET /api/area_conocimiento/1A01` devuelve
-   `{gran_area:"Ciencias Naturales", area:"Matemáticas",
+   `{granArea:"Ciencias Naturales", area:"Matemáticas",
    disciplina:"Matemáticas puras"}`; `GET /api/area_conocimiento/9Z99`
    responde **404** con mensaje claro.
 4. **Ciclo de los cinco verbos.** `POST` crea `9Z01` → `PUT` lo reemplaza
@@ -115,7 +115,7 @@ otros nombres.
    listado dice `total: 219`; después del `DELETE` vuelve a decir
    `total: 218`, **y la fila sigue en la base** con `activo = 0`
    (comprobable con una consulta directa).
-6. **La validación es la frontera.** `POST` sin `gran_area` → **422** con
+6. **La validación es la frontera.** `POST` sin `granArea` → **422** con
    `errores:[…]`; `POST` con un `id` de más de 6 caracteres → **422**;
    `POST` con un código que ya existe → **500** con el error del motor en
    `detalle`. En ninguno de los tres casos se toca la base.

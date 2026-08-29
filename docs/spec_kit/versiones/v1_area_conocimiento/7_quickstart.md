@@ -57,7 +57,7 @@ curl "http://localhost:8070/api/area_conocimiento?limite=3"
 
 # 3. Obtener una que existe, y una que no
 curl http://localhost:8070/api/area_conocimiento/1A01
-#    → {"id":"1A01","gran_area":"Ciencias Naturales","area":"Matemáticas",
+#    → {"id":"1A01","granArea":"Ciencias Naturales","area":"Matemáticas",
 #       "disciplina":"Matemáticas puras"}
 curl -i http://localhost:8070/api/area_conocimiento/9Z99
 #    → 404 con {"estado":404,"mensaje":"Área de conocimiento no encontrada.",...}
@@ -65,12 +65,12 @@ curl -i http://localhost:8070/api/area_conocimiento/9Z99
 # 4. El ciclo de los cinco verbos
 curl -X POST http://localhost:8070/api/area_conocimiento `
   -H "Content-Type: application/json" `
-  -d '{"id":"9Z01","gran_area":"Ciencias Naturales","area":"Matemáticas","disciplina":"Teoría de números"}'
+  -d '{"id":"9Z01","granArea":"Ciencias Naturales","area":"Matemáticas","disciplina":"Teoría de números"}'
 #    → 200 creada
 
 curl -X PUT http://localhost:8070/api/area_conocimiento/9Z01 `
   -H "Content-Type: application/json" `
-  -d '{"gran_area":"Humanidades","area":"Filosofía","disciplina":"Ética"}'
+  -d '{"granArea":"Humanidades","area":"Filosofía","disciplina":"Ética"}'
 #    → 200 filasAfectadas: 1
 
 curl -X PATCH http://localhost:8070/api/area_conocimiento/9Z01 `
@@ -83,12 +83,12 @@ curl http://localhost:8070/api/area_conocimiento/9Z01
 # 4b. La pareja que enseña la diferencia: MISMO cuerpo, dos verbos
 curl -i -X PUT http://localhost:8070/api/area_conocimiento/9Z01 `
   -H "Content-Type: application/json" `
-  -d '{"gran_area":"Humanidades","disciplina":"Ética"}'
+  -d '{"granArea":"Humanidades","disciplina":"Ética"}'
 #    → 422: al PUT le falta 'area' y reemplazar exige todo
 
 curl -i -X PATCH http://localhost:8070/api/area_conocimiento/9Z01 `
   -H "Content-Type: application/json" `
-  -d '{"gran_area":"Humanidades","disciplina":"Ética"}'
+  -d '{"granArea":"Humanidades","disciplina":"Ética"}'
 #    → 200: al PATCH le basta con lo enviado
 
 # 5. El borrado es LÓGICO, y se comprueba
@@ -109,11 +109,11 @@ docker compose exec sqlserver bash -c '/opt/mssql-tools18/bin/sqlcmd `
 curl -i -X POST http://localhost:8070/api/area_conocimiento `
   -H "Content-Type: application/json" `
   -d '{"id":"9Z02","area":"Matemáticas","disciplina":"X"}'
-#    → 422 con errores: falta gran_area
+#    → 422 con errores: falta granArea
 
 curl -i -X POST http://localhost:8070/api/area_conocimiento `
   -H "Content-Type: application/json" `
-  -d '{"id":"1A01","gran_area":"X","area":"Y","disciplina":"Z"}'
+  -d '{"id":"1A01","granArea":"X","area":"Y","disciplina":"Z"}'
 #    → 500: la llave primaria ya existe (la defiende la base)
 
 # 7. La prueba de capas: sin base de datos

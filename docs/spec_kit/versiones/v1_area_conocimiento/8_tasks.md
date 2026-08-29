@@ -44,17 +44,27 @@ este conteo — **nombrando las tablas**, que si no, no se sabe cuál es cuál:
 (`termino_clave` y `linea_investigacion` quedan **vacías**: el catálogo de
 referencia no trae datos para ellas.)
 
-## Fase 1 — El modelo y la excepción · *sirve a todos los RF*
+## Fase 1 — El proyecto que arranca y responde · *RF7*
 
+- [ ] `ApiInvestigacion.csproj` con los tres paquetes permitidos
+- [ ] `[P]` `appsettings.json` — la cadena de conexión de desarrollo, para
+      poder correr sin Docker. **El compose la sobreescribe**
+      ([3_plan](3_plan.md) §5)
+- [ ] `Program.cs` **mínimo**: Swagger y el endpoint de diagnóstico `GET /`
+      del RF7. Todavía sin ensamblador ni controladores — eso llega en la
+      Fase 5, cuando existan las clases que registrar
 - [ ] `Modelos/AreaConocimiento.cs` — la entidad: `Id`, `GranArea`, `Area`,
       `Disciplina`. **Sin `Activo`**: no viaja en las respuestas
 - [ ] `[P]` `Excepciones/NoEncontradoExcepcion.cs`
-- [ ] `ApiInvestigacion.csproj` con los tres paquetes permitidos
-- [ ] `[P]` `appsettings.json` — la cadena de conexión de desarrollo, para
-      poder correr sin Docker. **El compose la sobreescribe** con la
-      variable de entorno ([3_plan](3_plan.md) §5)
 
-**Verificar:** `dotnet build api_investigacion` compila.
+**Verificar:** `dotnet run --project api_investigacion` arranca, y
+`curl http://localhost:8070/` responde el diagnóstico con `"version":"v1"`.
+
+> **Por qué el `Program.cs` va aquí y no al final.** Con el SDK Web y sin
+> punto de entrada, el proyecto **no compila**: `error CS5001`. Si se deja
+> para la última fase, ninguna compuerta anterior se puede pasar y se
+> avanza a ciegas hasta el final. Empezar por algo que arranca —aunque solo
+> responda una ruta— es lo que permite verificar cada fase.
 
 ## Fase 2 — Las peticiones por verbo · *RF3, RF4, RF5*
 
@@ -67,8 +77,9 @@ referencia no trae datos para ellas.)
 
 Las tres son independientes: se pueden repartir.
 
-**Verificar:** compila. La diferencia entre la segunda y la tercera es lo
-que producirá el 422 del `PUT` y el 200 del `PATCH`.
+**Verificar:** `dotnet build api_investigacion` compila. La diferencia
+entre la segunda y la tercera es lo que producirá el 422 del `PUT` y el 200
+del `PATCH`.
 
 ## Fase 3 — Interfaces y repositorio · *RF1, RF2, RF6*
 
@@ -78,8 +89,9 @@ que producirá el 422 del `PUT` y el 200 del `PATCH`.
       Dapper, **siempre parametrizado**, con `WHERE activo = 1` en todo
       listado y el `UPDATE … SET activo = 0` del borrado
 
-**Verificar:** compila, y una lectura del código confirma que **ninguna**
-consulta concatena valores y que **ningún** listado olvida el `activo = 1`.
+**Verificar:** `dotnet build api_investigacion` compila, y una lectura del
+código confirma que **ninguna** consulta concatena valores y que **ningún**
+listado olvida el `activo = 1`.
 
 ## Fase 4 — Servicio, ensamblador y prueba de capas · *criterio 7*
 
@@ -98,10 +110,13 @@ desacopladas.
 
 - [ ] `Controllers/AreaConocimientoController.cs` — los 7 endpoints, con
       la traducción de excepciones a códigos HTTP
-- [ ] `Program.cs` — Swagger, y las dos líneas del ensamblador
+- [ ] `Program.cs` **crece**: se le agregan las dos líneas del ensamblador
+      ([3_plan](3_plan.md) §4.3) y el registro de controladores. Lo que ya
+      tenía —Swagger y el diagnóstico— no se toca
 
-**Verificar:** `dotnet run` y `curl http://localhost:8070/` responde el
-diagnóstico con `"version":"v1"`.
+**Verificar:** `dotnet run` y los siete endpoints responden contra la base
+que ya está en pie: `curl http://localhost:8070/api/area_conocimiento`
+devuelve **218**.
 
 ## Fase 6 — Docker: un solo comando · *criterio 1*
 

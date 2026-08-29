@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Paquetes permitidos según el Artículo 2 de la Constitución del proyecto -->
+    <!-- Microsoft.Data.SqlClient: proveedor oficial para conectividad ADO.NET con SQL Server -->
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    <!-- Dapper: micro-ORM para mapeo de consultas SQL escritas a mano hacia objetos de C# -->
+    <PackageReference Include="Dapper" Version="2.1.35" />
+    <!-- Swashbuckle: soporte para generación de documentación Swagger/OpenAPI -->
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- La carpeta pruebas/ tiene SU PROPIO proyecto (la prueba de capas): se excluye
+         de la compilación de la API para que no se mezclen los dos programas ni el
+         repositorio de mentiras termine publicado con el sistema real. -->
+    <Compile Remove="pruebas/**" />
+    <Content Remove="pruebas/**" />
+    <None Remove="pruebas/**" />
+  </ItemGroup>
+
+</Project>
