@@ -97,6 +97,7 @@ en `docs/`.
 
 | Documento | Qué contiene |
 |---|---|
+| [SDD_SPECKIT.md](docs/SDD_SPECKIT.md) | **Empiece por aquí**: qué es SDD, qué es GitHub Spec Kit, y cómo se arman estos documentos |
 | [1_constitution.md](docs/spec_kit/1_constitution.md) | Las 11 reglas permanentes del proyecto |
 | [0_mapa_versiones.md](docs/spec_kit/versiones/0_mapa_versiones.md) | La ruta v1 → v4 y qué tabla entra en cada versión |
 | [2_spec.md](docs/spec_kit/versiones/v1_area_conocimiento/2_spec.md) | QUÉ construir, los 7 criterios de aceptación y las **Clarificaciones** |
