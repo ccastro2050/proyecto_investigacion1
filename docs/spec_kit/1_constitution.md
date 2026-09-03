@@ -28,6 +28,57 @@
 - Si el código hace algo que la spec no dice, sobra; si la spec pide algo
   que el código no hace, falta.
 
+## Artículo 1.1 — Una versión incluye SU FRONT
+
+**Cada versión entrega su parte de la API *y* su parte del front.** No hay una
+versión «de back» y otra «de front».
+
+> **La regla operativa: una versión NO está cerrada si la API responde y la
+> pantalla no.** Media versión no es una versión.
+
+### Por qué
+
+| | |
+|---|---|
+| **Lo terminado se le puede mostrar a alguien** | Una versión que solo trae endpoints se sustenta con Swagger. Una que trae pantallas se le muestra a quien la pidió |
+| **El contrato se ejercita de inmediato** | Uno descubre que el JSON es incómodo **cuando le toca pintarlo**. Si el front llega tres versiones después, el contrato lleva tres versiones equivocado |
+| **No hay front de golpe al final** | Es el error que se paga caro: seis entidades de API esperando un front que nace con una sola, y una versión entera dedicada a que se alcancen |
+| **Es lo que pide el curso** | `0_METODOLOGIA.md` §2, textual: *«v1 — CRUD de las tablas sin FK del módulo — **API REST + Frontend funcionando**»* |
+
+Y lo que cuesta, que también hay que decirlo: **cada versión es el doble de
+grande** y cada compuerta revisa dos stacks. Se compensa recortando el alcance:
+esta v1 toma **una** tabla, no seis.
+
+### El front es un TERCER PROCESO
+
+**Blazor Server**, en su propio proyecto y en su propio contenedor, hablando
+con la API **solo por HTTP**. Tres cosas que se comprueban, no que se prometen:
+
+1. Su `.csproj` **no tiene ningún paquete de acceso a datos**.
+2. Su servicio en el compose **no depende del motor** de base de datos.
+3. Y la prueba: **apagando la API, la pantalla sigue en pie**, con su aviso y
+   **sin un solo dato**.
+
+### Y no comparte código con la API, aunque los dos estén en C#
+
+Se podría referenciar el proyecto de la API y usar sus clases. **No se hace.**
+El front tiene las suyas, que se parecen a las de la API porque el contrato es
+el mismo — no porque sean las mismas.
+
+Compartirlas ataría los dos procesos: renombrar una propiedad dentro de la API
+rompería el front **sin que nadie tocara el contrato HTTP**. Lo único que
+comparten es el JSON.
+
+> Con el front en otro lenguaje esto sería imposible y no habría nada que
+> cuidar. Aquí la tentación existe todos los días, y por eso es un artículo.
+
+### La pantalla habla el idioma del usuario
+
+Ni verbos HTTP, ni códigos de estado, ni nombres de tabla. Los dos botones de
+guardar se llaman **«Guardar la ficha completa»** y **«Guardar solo lo que
+cambié»**: que uno mande un reemplazo y el otro una modificación parcial es
+asunto del programa, no de quien usa el sistema.
+
 ## Artículo 2 — Stack: C# y ASP.NET Core, con el SQL a la vista
 
 - Lenguaje **C#** sobre **ASP.NET Core** (.NET 10): controladores con
@@ -165,7 +216,7 @@ un 404 o un 422 tienen su formato exacto documentado.
 
 | Cosa | Convención |
 |---|---|
-| Puertos del proyecto | API **8070** · SQL Server **11470** · (reservado: front **8071** para la v4) |
+| Puertos del proyecto | API **8070** · **front 8071** · SQL Server **11470** |
 | Base de datos | `investigacion_local` |
 | Rutas | `/` (diagnóstico) · `/swagger` (documentación interactiva) · `/api/{tabla}` |
 | Nombres | PascalCase en español; interfaces con prefijo `I`; carpetas `Controllers/ Modelos/ Peticiones/ Servicios/ Repositorios/ Excepciones/ pruebas/` (`Modelos/` = clases entidad; `Peticiones/` = el cuerpo de cada verbo) |

@@ -127,10 +127,10 @@ sin pelearse con ninguno:
 |---|---|---|
 | API investigación | **8070** | v1 |
 | SQL Server | **11470** | v1 |
-| Front | **8071** | reservado para la v4 |
+| **Front Blazor** | **8071** | la pantalla de esta misma versión |
 
 Quedan escritos en el artículo de convenciones de la constitución —incluido
-el del front, que todavía no existe— para que ninguna versión futura los pise.
+el del front— para que ninguna versión futura los pise.
 
 > **La regla, y aplica también a los equipos:** dos proyectos que puedan
 > estar encendidos a la vez **nunca** publican el mismo puerto del host. Si

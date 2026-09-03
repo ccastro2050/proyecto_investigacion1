@@ -237,7 +237,7 @@ escribirlo directamente.
 **6. `6_contracts.md` — el contrato HTTP exacto.**
 **Qué es:** endpoint por endpoint: verbo, URL, body de ejemplo y TODOS los
 códigos de respuesta con su JSON exacto.
-**Para qué sirve:** es lo que un cliente (el front futuro, Postman, el
+**Para qué sirve:** es lo que un cliente (el front, Postman, el
 profesor) puede EXIGIR sin leer el código; al cerrar la versión, estos
 contratos se congelan.
 **Cómo se hace:** un bloque por endpoint; incluya los desenlaces de ERROR
