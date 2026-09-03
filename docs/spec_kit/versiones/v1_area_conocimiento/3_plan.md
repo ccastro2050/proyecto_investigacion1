@@ -16,6 +16,28 @@
 Paquetes permitidos y ninguno más: `Microsoft.Data.SqlClient`, `Dapper` y
 `Swashbuckle.AspNetCore`.
 
+### 1.1 El stack del FRONT
+
+| Pieza | Elección | Por qué |
+|---|---|---|
+| Front | **Blazor Server**, .NET 10 | Es lo que pide el módulo. El componente se renderiza en el servidor y el navegador recibe HTML ya armado |
+| Cómo habla con la API | `HttpClient` y **JSON**, nada más | Sin biblioteca compartida, sin referencia de proyecto, sin paquete común |
+| Estilos | **CSS escrito a mano** | Ciento y pico de líneas, cero dependencias. Un front que necesita internet para verse bien no arranca en un salón sin red |
+| Puerto | **8071** | El impar del par estaba reservado justamente para esto |
+
+**Un servicio por recurso, no uno genérico.** `ServicioAreaConocimiento` tiene
+seis métodos con nombre —`Listar`, `Obtener`, `Crear`, `Reemplazar`,
+`Actualizar`, `Eliminar`— y sabe de una sola tabla. Cuando la v2 traiga más
+recursos habrá más servicios, no un `ApiService.Listar(string tabla)`. Es la
+sección 6.1 de la metodología del curso, aplicada del lado del front.
+
+> **Aquí hay una tentación que no existiría con dos lenguajes distintos.** El
+> front y la API están los dos en C#, así que *se podría* compartir la clase
+> `AreaConocimiento` con una referencia de proyecto. **No se hace.** El front
+> tiene la suya, que se parece a la de la API porque el contrato es el mismo —
+> no porque sea la misma. Compartirla ataría los dos procesos: un cambio
+> interno de la API rompería el front sin que nadie tocara el contrato.
+
 ## 2. Estructura de carpetas
 
 Los archivos de la v1, todos dentro de `api_investigacion/`:
@@ -67,6 +89,26 @@ señal de que el plan está incompleto: se corrige aquí, no en el código.
 > El síntoma cuando falta: `warning CS0436` — "el tipo X está en conflicto
 > con el tipo importado X". Es una advertencia, no un error, así que pasa
 > desapercibida.
+
+### 2.1 Las carpetas del front
+
+```
+front_blazor/
+├── FrontInvestigacion.csproj    sin paquetes: no hay driver de base de datos
+├── Program.cs                   el ensamblador: registra UN servicio por recurso
+├── appsettings.json             la dirección de la API (el compose la sobreescribe)
+├── Dockerfile                   dotnet watch, igual que la API
+├── Servicios/
+│   └── ServicioAreaConocimiento.cs   la capa de datos del front
+├── Components/
+│   ├── Layout/                  el marco y el menú
+│   └── Pages/                   una pantalla por recurso
+└── wwwroot/app.css              los estilos, escritos a mano
+```
+
+**Que en `FrontInvestigacion.csproj` no aparezca ningún paquete de acceso a
+datos no es un olvido: es la comprobación** de que este proceso no puede llegar
+a SQL Server ni queriendo.
 
 ## 3. Arquitectura en capas: el viaje de una petición
 

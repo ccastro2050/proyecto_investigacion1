@@ -79,6 +79,25 @@
 
 ---
 
+## F. La pantalla — la mitad que no es la API
+
+- [ ] La spec tiene un requisito **de la pantalla** (RF8), no solo de los
+      endpoints.
+- [ ] Está dicho que **una versión no está cerrada si la API responde y la
+      pantalla no**.
+- [ ] Hay un criterio que comprueba que la pantalla muestra **lo que dio la
+      API**, no datos inventados ni de otra parte.
+- [ ] Hay un criterio que se comprueba **apagando la API**: la pantalla sigue
+      en pie, con su aviso y **sin un solo dato**.
+- [ ] Está escrito que la pantalla **no le habla al usuario en jerga**, y cómo
+      se comprueba —**sobre el texto visible**, no sobre el HTML—.
+- [ ] Está escrito que el front **no comparte código** con la API, aunque los
+      dos estén en C#, y qué pasaría si lo compartiera (D-v1-9).
+- [ ] Está declarado **lo que la prueba automática NO puede hacer** con Blazor
+      Server, y qué queda para el recorrido a mano.
+- [ ] El front tiene **un servicio por recurso**, no uno genérico con el nombre
+      de la tabla como parámetro.
+
 ## Resultado
 
 | | |

@@ -148,3 +148,55 @@ en el dashboard de la v4. La corrección queda anotada en la cabecera de
 
 **Consecuencias.** El script deja de ser una copia literal del Excel, y por
 eso mismo la cabecera del script tiene que decirlo. **Estado:** vigente.
+
+---
+
+## D-v1-9 — El front es un TERCER PROCESO, y no comparte código con la API
+
+**Lo que se decidió.** El front va en su propio contenedor, en su propio
+puerto, con su propio proyecto de .NET. Habla con la API **solo por HTTP**.
+
+**Lo que se descartó.**
+
+| Alternativa | Por qué no |
+|---|---|
+| **Servir las páginas desde la misma API** (Razor Pages en el proyecto de la API) | Un solo proceso: la separación entre presentación y datos pasaría a ser una convención que nadie puede verificar. Y apagar «la API» apagaría también la pantalla, así que la prueba del criterio 11 dejaría de existir |
+| **Compartir la clase `AreaConocimiento`** con una referencia de proyecto | Ataría los dos procesos: un cambio interno de la API —renombrar una propiedad— rompería el front **sin que nadie tocara el contrato**. Lo único que deben compartir es el JSON |
+| **Un `ApiService` genérico** con el nombre de la tabla como parámetro | Sección 6.1 de la metodología: un método `Listar(string tabla)` no dice qué recursos existen, y el compilador deja de revisar |
+
+**Cómo se verifica que la decisión se cumple**, que es lo que la vuelve algo
+más que una intención:
+
+1. `FrontInvestigacion.csproj` **no tiene ningún paquete** de acceso a datos.
+2. El servicio `front-blazor` **no depende de `sqlserver`** en el compose.
+3. Y la prueba: `docker compose stop api-investigacion` deja la pantalla en
+   pie, con su aviso y **sin un solo dato** (criterio 11).
+
+> **Los dos en C# es lo que hace difícil esta decisión, no lo que la hace
+> fácil.** Con el front en otro lenguaje, compartir código sería imposible y no
+> habría nada que cuidar. Aquí la tentación existe todos los días, y por eso
+> queda escrita.
+
+---
+
+## D-v1-10 — La pantalla no le habla al usuario en jerga
+
+**Lo que se decidió.** En la pantalla no aparece ningún verbo HTTP, ningún
+código de estado, ni el nombre de ninguna tabla. Los dos botones de guardar se
+llaman **«Guardar la ficha completa»** y **«Guardar solo lo que cambié»**.
+
+**Lo que se descartó:** nombrarlos «PUT» y «PATCH», que es lo que sale solo
+cuando quien escribe la pantalla viene de escribir el controlador.
+
+**Por qué importa más de lo que parece.** Quien usa esto administra un catálogo
+de áreas de conocimiento. «PUT» no le dice nada, y peor: le sugiere que
+necesita saber algo que no necesita. La distinción que sí le sirve —«¿mando
+todo o solo lo que toqué?»— es exactamente la que los dos nombres explican.
+
+Y no se pierde nada del contenido técnico: **el mismo formulario a medio llenar
+que «la ficha completa» rechaza, «solo lo que cambié» lo guarda.** La lección
+del contrato sigue ahí, y ahora se puede ver con los ojos.
+
+> Se comprueba automáticamente, y **sobre el texto visible**, no sobre el HTML:
+> el guion quita las etiquetas y decodifica las entidades antes de buscar. La
+> primera versión buscaba en el código fuente y dio dos falsos positivos.

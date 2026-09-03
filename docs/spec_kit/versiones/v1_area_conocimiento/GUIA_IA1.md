@@ -98,10 +98,42 @@ REGLAS DE TRABAJO (no negociables):
 7. Todo en español: nombres, comentarios y mensajes.
 8. Trabajo en Windows con VS Code (terminal integrada de PowerShell) y
    Docker Desktop. Dame los comandos para ese entorno. La API publica el
-   puerto 8070 y SQL Server el 11470.
+   puerto 8070, SQL Server el 11470 y EL FRONT el 8071.
+
+9. LA VERSIÓN INCLUYE SU PANTALLA, y esto es la mitad del trabajo, no un
+   añadido. Un FRONT en BLAZOR SERVER (.NET 10), en su propio proyecto y en
+   su propio contenedor:
+
+   · una pantalla por recurso, con DIRECCIÓN PROPIA (/areas-de-conocimiento),
+     nunca una ruta con el nombre de la tabla como parámetro;
+   · un SERVICIO POR RECURSO —ServicioAreaConocimiento con seis métodos—,
+     nunca un ApiService genérico con la tabla como parámetro;
+   · la pantalla NO le habla al usuario en jerga: ni PUT, ni PATCH, ni 422,
+     ni el nombre de la tabla. Los dos botones de guardar se llaman
+     "Guardar la ficha completa" y "Guardar solo lo que cambié";
+   · y un error de la API NO borra lo que la persona había escrito.
+
+   TRES COSAS QUE VAS A QUERER HACER Y NO DEBES:
+
+   a) Compartir la clase AreaConocimiento entre la API y el front con una
+      referencia de proyecto. NO: el front tiene la suya. Están los dos en C#
+      y aun así lo único que comparten es el JSON. Si se compartiera, un
+      cambio interno de la API rompería el front sin que nadie tocara el
+      contrato.
+   b) Servir las páginas desde la misma API. NO: son dos procesos, y eso hay
+      que poder demostrarlo apagando uno.
+   c) Meter Bootstrap o cualquier biblioteca por CDN. NO: el CSS va escrito a
+      mano. Un front que necesita internet para verse bien no arranca en un
+      salón sin red.
 
 Al final, la versión 1 está TERMINADA solo cuando pasan los criterios de
-aceptación de 2_spec.md, verificados con el smoke test de 7_quickstart.md.
+aceptación de 2_spec.md —LOS ONCE, incluidos los cuatro de la pantalla—,
+verificados con el smoke test de 7_quickstart.md.
+
+Y hay un criterio que se comprueba apagando un contenedor: con la API
+apagada, la pantalla tiene que SEGUIR RESPONDIENDO, con su menú y su aviso,
+y SIN UN SOLO DATO. Si sigue mostrando el catálogo, el front está leyendo de
+donde no debe.
 
 Empieza: resume en máximo 10 líneas qué vamos a construir (para confirmar
 que entendiste el alcance) y luego arranca con la Fase 0.
@@ -214,3 +246,20 @@ Tres cosas que conviene vigilar desde el primer archivo:
 
 Las tres están decididas en las Clarificaciones. Si la IA propone otra
 cosa, no está mejorando: está ignorando la spec.
+
+### Y tres más, ahora que la versión tiene pantalla
+
+| Qué | Por qué pasa | Qué revisar |
+|---|---|---|
+| **Compartir la clase entre la API y el front** | Están los dos en C#, así que una referencia de proyecto «se ve limpia». Ata los dos procesos | ¿El `.csproj` del front referencia el de la API? No debe |
+| **Un `ApiService` genérico** con la tabla como parámetro | Es más corto, y con una sola tabla ni se nota | ¿El servicio se llama `ServicioAreaConocimiento` o `ApiService`? |
+| **Meter Bootstrap por CDN** | Es lo que hace todo el mundo | ¿`App.razor` tiene un `<link>` a un dominio externo? |
+
+**Y una pregunta que hay que hacerle siempre, porque no la contesta sola:**
+
+> «Apaga la API con `docker compose stop api-investigacion` y dime qué muestra
+> la pantalla.»
+
+Si la respuesta no es «sigue en pie, con un aviso y sin datos», el front está
+leyendo de donde no debe — o no maneja el caso de que la API no responda, que
+es el mismo problema visto de otro lado.

@@ -127,6 +127,36 @@ devuelve **218**.
 **Verificar:** `docker compose down -v` y luego
 `docker compose up -d --build` deja **todo** funcionando desde cero.
 
+## Fase 6.5 — El FRONT: la otra mitad de la versión · *RF8, criterios 8 a 11*
+
+Va **después** de que la API responda y **antes** del cierre. No es un añadido
+opcional: sin esta fase la versión está a medias.
+
+| # | Tarea | Archivo |
+|---|---|---|
+| 6.5.1 | El proyecto Blazor Server, **sin ningún paquete de acceso a datos** | `front_blazor/FrontInvestigacion.csproj` |
+| 6.5.2 | `ServicioAreaConocimiento`: seis métodos, uno por operación | `Servicios/ServicioAreaConocimiento.cs` |
+| 6.5.3 | El tipo `Resultado<T>` — para que las páginas no vean códigos de estado | `Servicios/ServicioAreaConocimiento.cs` |
+| 6.5.4 | La traducción del sobre de error a textos para el usuario | `Servicios/ServicioAreaConocimiento.cs` |
+| 6.5.5 | El marco y el menú, con **un enlace por pantalla** | `Components/Layout/` |
+| 6.5.6 | La pantalla del CRUD, con los **dos botones** de guardar | `Components/Pages/AreasDeConocimiento.razor` |
+| 6.5.7 | Los estilos, escritos a mano | `wwwroot/app.css` |
+| 6.5.8 | El servicio en el compose, en el **8071**, sin `depends_on: sqlserver` | `docker-compose.yml` |
+| 6.5.9 | La prueba de humo del front | `pruebas_humo/humo_front.py` |
+
+**Verificación de la fase** — las cuatro, y la última es la que cuenta:
+
+- [ ] `http://localhost:8071/areas-de-conocimiento` muestra las 218 filas.
+- [ ] El recorrido a mano de [7_quickstart §4.2](7_quickstart.md) se hizo
+      completo: agregar, los dos botones, retirar.
+- [ ] `python pruebas_humo/humo_front.py` da todo en verde.
+- [ ] **Con `docker compose stop api-investigacion`, la pantalla sigue en pie
+      con su aviso y sin un solo dato.**
+
+> **La 6.5.9 tiene un límite declarado.** Blazor Server manda los clics por una
+> conexión persistente, así que un guion no puede llenar el formulario. Por eso
+> hay dos verificaciones y no una: la automática y el recorrido a mano.
+
 ## Fase 7 — Cierre
 
 - [ ] Correr el smoke test completo de [7_quickstart.md](7_quickstart.md)
