@@ -1,14 +1,16 @@
 # ==============================================================
 # Módulo INVESTIGACIÓN — versión 1
 #
-#   Navegador → API investigación (C#, :8070) → SQL Server (investigacion_local)
+#   FRONT Blazor (:8071) → API investigación (C#, :8070) → SQL Server
+#
+# TRES procesos, no dos. El front es una aplicación aparte que solo habla con
+# la API por HTTP: no tiene línea hacia SQL Server, y no la va a tener nunca.
 #
 # Uso: docker compose up -d --build     (UN solo comando)
 # Reset de la BD: docker compose down -v && docker compose up -d
 #
-# En la v1 solo están los dos servicios de base de datos: el servicio
-# api-investigacion se agrega en la Fase 6 de 8_tasks.md, cuando exista
-# su Dockerfile. Este archivo CRECE con las versiones.
+# Este archivo declara TODO el sistema: la base, su inicializador, la API y
+# el front. Un solo comando lo levanta.
 #
 # Compose v2 ignora la directiva 'version:' y advierte que está obsoleta:
 # por eso no aparece.
@@ -76,6 +78,27 @@ services:
     depends_on:
       sqlserver-init:
         condition: service_completed_successfully   # espera a que la base este SEMBRADA
+
+  # --- El FRONT: Blazor Server, C#/.NET ---------------------------------
+  front-blazor:
+    build: ./front_blazor
+    container_name: investigacion-front
+    restart: unless-stopped
+    ports:
+      - "8071:8071"                # http://localhost:8071
+    volumes:
+      - ./front_blazor:/app        # el código montado: guardar un .razor recompila solo
+      - /app/bin                   # bin y obj quedan DENTRO del contenedor
+      - /app/obj
+    environment:
+      # El NOMBRE del servicio, no localhost: dentro del contenedor del front,
+      # localhost sería el front mismo.
+      - UrlApi=http://api-investigacion:8070
+    depends_on:
+      - api-investigacion
+      # NO depende de sqlserver, y eso no es un olvido: el front no tiene nada
+      # que hacer con la base. Si algún día necesitara esa dependencia, sería
+      # la señal de que alguien rompió la arquitectura.
 
 volumes:
   mssqldata:                       # la "memoria" de la base: sobrevive a `down`

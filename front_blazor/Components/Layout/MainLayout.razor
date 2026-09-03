@@ -1,0 +1,37 @@
+@*
+    El marco de todas las pantallas: la barra de arriba, el menú y el
+    contenido.
+
+    NO HAY AUTENTICACIÓN AQUÍ, y no es un olvido. La v1 construye el CRUD de
+    un catálogo; el ingreso con usuario y el control de acceso por rol son de
+    otra versión, y anticiparlos contradice el Artículo 1.
+*@
+@inherits LayoutComponentBase
+
+<div class="pagina">
+
+    <header>
+        <div class="barra">
+            <div class="contenedor barra-interna">
+                <a class="marca" href="">Investigación</a>
+                <span class="dependencia">Universidad de San Buenaventura</span>
+            </div>
+        </div>
+        <NavMenu />
+    </header>
+
+    <main class="contenedor">
+        @Body
+    </main>
+
+    <footer class="contenedor">
+        <p>Sistema de investigación &mdash; ejemplo de referencia del curso</p>
+    </footer>
+
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    Ocurrió un error inesperado.
+    <a href="." class="reload">Recargar</a>
+    <span class="dismiss">🗙</span>
+</div>

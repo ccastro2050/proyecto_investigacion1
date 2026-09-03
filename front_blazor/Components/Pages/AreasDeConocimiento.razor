@@ -1,0 +1,323 @@
+@page "/areas-de-conocimiento"
+@rendermode InteractiveServer
+@inject ServicioAreaConocimiento Servicio
+@inject IJSRuntime JS
+
+@*
+    ==================================================================
+    LA PANTALLA DE `area_conocimiento`
+    ==================================================================
+
+    Tiene DIRECCIÓN PROPIA —/areas-de-conocimiento—, no una con el nombre de la
+    tabla como parámetro. Se puede guardar como marcador, mandar por correo y
+    poner en un menú (Artículo 10.1).
+
+    Y no le habla al usuario en jerga: aquí no aparece «PUT», ni «422», ni
+    «area_conocimiento». Los dos botones de guardar se llaman como el usuario
+    piensa; que uno mande un reemplazo y el otro una modificación parcial es
+    asunto del programa.
+*@
+
+<PageTitle>Áreas de conocimiento</PageTitle>
+
+<div class="encabezado">
+    <div>
+        <h1>Áreas de conocimiento</h1>
+        <p class="nota">
+            La clasificación en tres niveles —gran área, área y disciplina—
+            con la que se registran las líneas y los grupos.
+            Las áreas retiradas dejan de aparecer aquí, pero no se borran: lo
+            que ya quedó registrado con ellas se conserva.
+        </p>
+    </div>
+    @if (!mostrandoFormulario)
+    {
+        <button class="boton primario" @onclick="Agregar">Agregar</button>
+    }
+</div>
+
+@* ─────────── LOS AVISOS ─────────── *@
+@foreach (var error in errores)
+{
+    <p class="aviso error">@error</p>
+}
+@if (!string.IsNullOrEmpty(exito))
+{
+    <p class="aviso exito">@exito</p>
+}
+
+@* ─────────── EL FORMULARIO ─────────── *@
+@if (mostrandoFormulario)
+{
+    <div class="tarjeta-formulario">
+        <h2>@(editando ? "Editar el área" : "Agregar un área")</h2>
+
+        <label>
+            Código
+            <input type="text" maxlength="6" @bind="campoId" disabled="@editando" />
+            @if (editando)
+            {
+                <span class="ayuda">
+                    El código identifica la ficha y no se cambia. Si está mal,
+                    se agrega otra y se retira esta.
+                </span>
+            }
+            else
+            {
+                <span class="ayuda">
+                    Hasta seis caracteres, como <code>1A01</code>. No se podrá
+                    cambiar después.
+                </span>
+            }
+        </label>
+
+        <label>
+            Gran área
+            <input type="text" @bind="campoGranArea" />
+            <span class="ayuda">La categoría superior: Ciencias Naturales, Ingeniería…</span>
+        </label>
+
+        <label>
+            Área
+            <input type="text" @bind="campoArea" />
+        </label>
+
+        <label>
+            Disciplina
+            <input type="text" @bind="campoDisciplina" />
+        </label>
+
+        @*
+            ==============================================================
+            LOS DOS BOTONES, QUE NO HACEN LO MISMO
+
+              · «Guardar la ficha completa» manda todo, así que un dato
+                obligatorio en blanco se rechaza.
+              · «Guardar solo lo que cambié» manda únicamente lo diligenciado,
+                así que el mismo formulario a medio llenar sí se guarda.
+
+            El mismo formulario, dos comportamientos, y la diferencia no la
+            decide ningún `if` de negocio: la decide QUÉ SE ENVÍA.
+            ==============================================================
+        *@
+        <div class="pareja">
+            @if (editando)
+            {
+                <button class="boton primario" @onclick="GuardarCompleta" disabled="@guardando">
+                    Guardar la ficha completa
+                </button>
+                <button class="boton" @onclick="GuardarLoQueCambio" disabled="@guardando">
+                    Guardar solo lo que cambié
+                </button>
+            }
+            else
+            {
+                <button class="boton primario" @onclick="Crear" disabled="@guardando">
+                    Agregar
+                </button>
+            }
+            <button class="boton" @onclick="Cancelar" disabled="@guardando">Cancelar</button>
+        </div>
+
+        @if (editando)
+        {
+            <span class="ayuda">
+                «La ficha completa» exige que los tres datos estén
+                diligenciados. «Solo lo que cambié» guarda lo que usted escribió
+                y deja lo demás como estaba.
+            </span>
+        }
+    </div>
+}
+
+@* ─────────── EL LISTADO ─────────── *@
+@if (cargando)
+{
+    <p class="nota">Cargando…</p>
+}
+else if (areas.Count > 0)
+{
+    <div class="tabla-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Gran área</th>
+                    <th>Área</th>
+                    <th>Disciplina</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var area in areas)
+                {
+                    <tr>
+                        <td><code>@area.Id</code></td>
+                        <td>@area.GranArea</td>
+                        <td>@area.Area</td>
+                        <td>@area.Disciplina</td>
+                        <td>
+                            <div class="acciones">
+                                <button class="boton" @onclick="() => Editar(area)">Editar</button>
+                                <button class="boton peligro" @onclick="() => Retirar(area)">Retirar</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <p class="nota">@areas.Count ficha(s).</p>
+}
+else
+{
+    @* Vacío NO es un error, y la pantalla lo distingue: si la API está caída,
+       arriba hay además un aviso rojo. *@
+    <p class="vacio">
+        Todavía no hay áreas de conocimiento. Use «Agregar» para crear la primera.
+    </p>
+}
+
+@code {
+    private List<AreaConocimiento> areas = new();
+    private List<string> errores = new();
+    private string exito = string.Empty;
+
+    private bool cargando = true;
+    private bool guardando;
+    private bool mostrandoFormulario;
+    private bool editando;
+
+    private string campoId = string.Empty;
+    private string campoGranArea = string.Empty;
+    private string campoArea = string.Empty;
+    private string campoDisciplina = string.Empty;
+
+    protected override async Task OnInitializedAsync() => await Cargar();
+
+    private async Task Cargar()
+    {
+        cargando = true;
+        var r = await Servicio.Listar();
+        cargando = false;
+
+        // Aun con error se pinta la pantalla: el usuario ve el aviso DENTRO de
+        // la aplicación, no una página de excepción.
+        errores = r.Errores;
+        areas = r.Ok ? r.Datos! : new();
+    }
+
+    private void Agregar()
+    {
+        Limpiar();
+        editando = false;
+        mostrandoFormulario = true;
+    }
+
+    private void Editar(AreaConocimiento area)
+    {
+        campoId = area.Id;
+        campoGranArea = area.GranArea;
+        campoArea = area.Area;
+        campoDisciplina = area.Disciplina;
+        editando = true;
+        mostrandoFormulario = true;
+        errores = new();
+        exito = string.Empty;
+    }
+
+    private void Cancelar()
+    {
+        mostrandoFormulario = false;
+        Limpiar();
+    }
+
+    private void Limpiar()
+    {
+        campoId = campoGranArea = campoArea = campoDisciplina = string.Empty;
+        errores = new();
+        exito = string.Empty;
+    }
+
+    private async Task Crear()
+    {
+        guardando = true;
+        var r = await Servicio.Crear(new AreaConocimiento
+        {
+            Id = campoId.Trim(),
+            GranArea = campoGranArea.Trim(),
+            Area = campoArea.Trim(),
+            Disciplina = campoDisciplina.Trim()
+        });
+        guardando = false;
+
+        await TrasGuardar(r, $"Se agregó el área {campoId}.");
+    }
+
+    private async Task GuardarCompleta()
+    {
+        guardando = true;
+        var r = await Servicio.Reemplazar(campoId, new AreaConocimiento
+        {
+            GranArea = campoGranArea.Trim(),
+            Area = campoArea.Trim(),
+            Disciplina = campoDisciplina.Trim()
+        });
+        guardando = false;
+
+        await TrasGuardar(r, $"Se guardó el área {campoId}.");
+    }
+
+    private async Task GuardarLoQueCambio()
+    {
+        guardando = true;
+        var r = await Servicio.Actualizar(
+            campoId, campoGranArea, campoArea, campoDisciplina);
+        guardando = false;
+
+        await TrasGuardar(r, $"Se guardó el área {campoId}.");
+    }
+
+    /// <summary>
+    /// Lo que pasa después de cualquier guardado: si salió bien se cierra el
+    /// formulario y se recarga; si no, **el formulario se queda con lo que la
+    /// persona había escrito**, porque perder lo digitado por un error de
+    /// validación es castigarla dos veces.
+    /// </summary>
+    private async Task TrasGuardar(Resultado<bool> r, string mensaje)
+    {
+        if (r.Ok)
+        {
+            mostrandoFormulario = false;
+            exito = mensaje;
+            errores = new();
+            await Cargar();
+        }
+        else
+        {
+            errores = r.Errores;
+            exito = string.Empty;
+        }
+    }
+
+    private async Task Retirar(AreaConocimiento area)
+    {
+        // Se pregunta antes: retirar no se deshace desde esta pantalla.
+        var seguro = await JS.InvokeAsync<bool>(
+            "confirm", $"¿Retirar {area.Id} del uso?");
+        if (!seguro) return;
+
+        var r = await Servicio.Eliminar(area.Id);
+        if (r.Ok)
+        {
+            exito = $"Se retiró el área {area.Id}.";
+            errores = new();
+            await Cargar();
+        }
+        else
+        {
+            errores = r.Errores;
+            exito = string.Empty;
+        }
+    }
+}

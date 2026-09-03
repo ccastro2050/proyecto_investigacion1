@@ -1,0 +1,132 @@
+/* ==============================================================
+   Estilos del front de Investigación.
+
+   Escritos a mano y sin ninguna biblioteca: son ciento y pico de líneas y
+   no traen dependencias que haya que descargar, actualizar ni explicar.
+   Un front que necesita internet para verse bien es un front que no arranca
+   en un salón sin red.
+   ============================================================== */
+
+:root {
+  --acento:  #1f6feb;
+  --oscuro:  #1d1d1b;
+  --borde:   #d9d5d0;
+  --suave:   #6b6560;
+  --fondo:   #f7f5f2;
+  --error:   #b3261e;
+  --exito:   #1e6f3f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--oscuro);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.contenedor { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+
+/* --- la barra y el menú --- */
+.barra { background: var(--oscuro); color: #fff; }
+.barra-interna { display: flex; align-items: center; gap: 16px; padding: 12px 20px; }
+.marca { color: #fff; font-weight: 700; font-size: 1.1rem; text-decoration: none; }
+.dependencia { color: #b9b4ae; font-size: .8rem; }
+
+.menu { background: #fff; border-bottom: 1px solid var(--borde); }
+.menu-interno { display: flex; flex-wrap: wrap; gap: 2px; padding: 0 20px; }
+.menu .enlace {
+  display: inline-block; padding: 10px 12px; font-size: .88rem; font-weight: 600;
+  color: var(--suave); text-decoration: none; border-bottom: 3px solid transparent;
+}
+.menu .enlace:hover { color: var(--oscuro); background: #efedea; }
+.menu .enlace.active { color: var(--oscuro); border-bottom-color: var(--acento); }
+
+main { padding: 28px 20px 40px; }
+
+/* --- encabezado de página --- */
+.encabezado {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 20px; flex-wrap: wrap; margin-bottom: 8px;
+}
+h1 { font-size: 1.5rem; margin: 0 0 4px; }
+h2 { font-size: 1.1rem; margin: 0 0 14px; }
+
+/* --- avisos --- */
+.aviso {
+  padding: 10px 14px; border-radius: 6px; border-left: 4px solid;
+  margin: 10px 0; font-size: .92rem;
+}
+.aviso.error { background: #fdf2f2; border-color: var(--error); color: var(--error); }
+.aviso.exito { background: #f1f8f4; border-color: var(--exito); color: var(--exito); }
+
+/* --- tabla --- */
+.tabla-scroll { overflow-x: auto; }
+table {
+  width: 100%; border-collapse: collapse; background: #fff; margin-top: 18px;
+  border: 1px solid var(--borde); border-radius: 8px; overflow: hidden;
+}
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--borde); }
+th { background: #efedea; font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; }
+tr:last-child td { border-bottom: none; }
+code { background: #efedea; padding: 1px 6px; border-radius: 4px; font-size: .9em; }
+
+/* --- botones --- */
+.acciones { display: flex; gap: 8px; align-items: center; }
+.boton {
+  display: inline-block; padding: 7px 14px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--borde); background: #fff; color: var(--oscuro);
+  font: inherit; font-size: .9rem; text-decoration: none;
+}
+.boton:hover { background: #efedea; }
+.boton:disabled { opacity: .5; cursor: default; }
+.boton.primario { background: var(--acento); border-color: var(--acento); color: #fff; }
+.boton.primario:hover { filter: brightness(1.1); }
+.boton.peligro { color: var(--error); border-color: #e8c3c5; }
+.boton.peligro:hover { background: #fdf2f2; }
+
+/* --- formulario --- */
+.tarjeta-formulario {
+  background: #fff; border: 1px solid var(--borde); border-radius: 8px;
+  padding: 20px; margin: 18px 0; max-width: 620px;
+}
+label { display: block; margin-bottom: 16px; font-weight: 600; font-size: .9rem; }
+input[type=text] {
+  display: block; width: 100%; margin-top: 5px; padding: 9px 11px;
+  border: 1px solid var(--borde); border-radius: 6px; font: inherit; background: #fff;
+}
+input:focus { outline: 2px solid var(--acento); outline-offset: 1px; }
+input:disabled { background: #efedea; color: var(--suave); }
+.ayuda { display: block; margin-top: 4px; font-weight: 400; font-size: .82rem; color: var(--suave); }
+.pareja { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+
+/* --- tarjetas del inicio --- */
+.tarjetas {
+  display: grid; gap: 14px; margin: 20px 0;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+.tarjeta {
+  display: block; background: #fff; border: 1px solid var(--borde);
+  border-radius: 8px; padding: 16px 18px; text-decoration: none; color: inherit;
+}
+.tarjeta:hover { border-color: var(--acento); }
+.tarjeta strong { display: block; margin-bottom: 4px; }
+
+/* --- varios --- */
+.nota, .vacio { color: var(--suave); font-size: .9rem; }
+.vacio {
+  background: #fff; border: 1px dashed var(--borde); border-radius: 8px;
+  padding: 22px; text-align: center; margin-top: 18px;
+}
+footer { border-top: 1px solid var(--borde); padding: 16px 20px 30px; }
+footer p { color: var(--suave); font-size: .85rem; margin: 0; }
+
+/* --- el aviso de error de Blazor --- */
+#blazor-error-ui {
+  background: #ffe9e9; bottom: 0; display: none; left: 0; padding: 10px 20px;
+  position: fixed; width: 100%; z-index: 1000; border-top: 2px solid var(--error);
+}
+#blazor-error-ui .dismiss { cursor: pointer; position: absolute; right: 16px; top: 10px; }

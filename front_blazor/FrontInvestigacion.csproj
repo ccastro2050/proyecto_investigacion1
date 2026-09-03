@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>FrontInvestigacion</RootNamespace>
+  </PropertyGroup>
+
+  <!-- Sin paquetes: Blazor Server viene en el SDK web, y el front no necesita
+       NADA de acceso a datos. Que aquí no aparezca ningún driver de base de
+       datos no es un olvido: es la comprobación de que este proceso no puede
+       llegar a SQL Server ni queriendo. -->
+
+</Project>
