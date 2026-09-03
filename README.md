@@ -29,6 +29,8 @@ sus catálogos, y compila la API. Al terminar:
 
 | Qué | Dónde |
 |---|---|
+| **LA PANTALLA** (lo que ve el usuario) | http://localhost:8071 |
+| Áreas de conocimiento | http://localhost:8071/areas-de-conocimiento |
 | **API — diagnóstico** | http://localhost:8070/ |
 | **Documentación interactiva** | http://localhost:8070/swagger |
 | Listado de áreas de conocimiento | http://localhost:8070/api/area_conocimiento |

@@ -175,3 +175,50 @@ DELETE /api/area_conocimiento/9Z99           ← nunca existió
 **La fila no se borra:** queda con `activo = 0` y desaparece de los
 listados. Comprobarlo es el criterio 5 de la spec: el `total` vuelve a 218
 y la fila sigue en la base.
+
+
+---
+
+## 8. El contrato de la PANTALLA
+
+Los siete apartados anteriores son el contrato de la API con **cualquiera** que
+la consuma. Este es el de la pantalla con **quien la usa**, y son dos contratos
+distintos: el front es *un* cliente de la API, no *el* cliente.
+
+| Pantalla | Dirección | Qué ofrece |
+|---|---|---|
+| Inicio | <http://localhost:8071/> | La entrada, con el enlace al catálogo |
+| Áreas de conocimiento | <http://localhost:8071/areas-de-conocimiento> | La tabla, «Agregar», «Editar» y «Retirar» |
+
+**Cada pantalla tiene dirección propia**, no una con el nombre de la tabla como
+parámetro (Artículo 10.1 · sección 6.1 de la metodología). Se puede guardar
+como marcador, poner en el menú y mandar por correo.
+
+### Qué pantalla llama a qué endpoint
+
+| Lo que hace el usuario | Lo que manda el front |
+|---|---|
+| Abrir la pantalla | `GET /api/area_conocimiento?limite=1000` |
+| «Agregar» y guardar | `POST /api/area_conocimiento` |
+| «Editar» | `GET /api/area_conocimiento/{id}` (ya viene en el listado) |
+| «Guardar la ficha completa» | `PUT /api/area_conocimiento/{id}` |
+| «Guardar solo lo que cambié» | `PATCH /api/area_conocimiento/{id}` con **solo** lo diligenciado |
+| «Retirar», tras confirmar | `DELETE /api/area_conocimiento/{id}` |
+
+### Cómo traduce el front los errores de la API
+
+El front **no repite** ninguna validación de la API: manda, y muestra lo que
+vuelva. Su servicio traduce el sobre a una lista de textos:
+
+| Lo que responde la API | Lo que ve el usuario |
+|---|---|
+| **422** con `errores[]` | Un aviso rojo por cada error, con el texto que mandó la API |
+| **400 / 404 / 500** con `{mensaje, detalle}` | Un aviso rojo con esos dos textos |
+| **La API no responde** | «El servicio no está disponible. ¿Está arriba la API?» |
+
+> **La última fila es la que demuestra la arquitectura.** Con la API apagada la
+> pantalla **sigue en pie** —cabecera, menú, pie— y muestra ese aviso **sin un
+> solo dato**. Si el front pudiera llegar a SQL Server por su cuenta, seguiría
+> mostrando el catálogo.
+>
+> Lo comprueba `pruebas_humo/humo_front.py`, que apaga la API a propósito.

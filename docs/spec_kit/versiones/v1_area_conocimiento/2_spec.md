@@ -5,6 +5,18 @@
 > tres capas completas. Ante conflicto con este documento, manda la
 > [constitución](../../1_constitution.md).
 
+## 0. Qué entrega esta versión, en una línea
+
+**El CRUD de `area_conocimiento` de punta a punta: su API y su pantalla.**
+
+Tres procesos que se levantan con un comando:
+
+```
+FRONT Blazor (:8071) ──HTTP──> API C# (:8070) ──SQL──> SQL Server (:11470)
+```
+
+El front **no tiene línea hacia la base de datos**, y no la va a tener nunca.
+
 ## 1. Propósito de la v1
 
 Construir la API del catálogo de **áreas de conocimiento** de punta a
@@ -80,6 +92,37 @@ otros nombres.
 ### RF7 — Diagnóstico
 `GET /` → JSON con mensaje, versión (`"v1"`) y la ruta de los contratos.
 
+### RF8 — La PANTALLA de áreas de conocimiento
+
+Los siete requisitos anteriores describen la API. **Este describe lo que ve
+quien la usa**, y sin él la versión no está cerrada: una versión que responde
+por HTTP pero no se puede usar es media versión.
+
+En `http://localhost:8071/areas-de-conocimiento`:
+
+| Lo que se puede hacer | Cómo se ve |
+|---|---|
+| **Consultar** el catálogo | Una tabla con las cuatro columnas: código, gran área, área y disciplina |
+| **Agregar** una ficha | Un formulario con **un** botón |
+| **Corregir** una ficha | El mismo formulario con **dos** botones: «Guardar la ficha completa» y «Guardar solo lo que cambié» |
+| **Retirar** una ficha | Un botón que pide confirmación primero |
+
+**Tres reglas de esta pantalla**, y las tres se comprueban:
+
+1. **No le habla al usuario en jerga.** Ni «PUT», ni «422», ni
+   `area_conocimiento`. Los botones se llaman como el usuario piensa; que uno
+   mande un reemplazo y el otro una modificación parcial es asunto del
+   programa.
+2. **Un error no pierde lo escrito.** Si la API rechaza el guardado, el
+   formulario vuelve con lo que la persona había digitado.
+3. **Vacío no es error.** Un catálogo sin fichas muestra un recuadro que lo
+   dice, no un aviso rojo.
+
+> **Los dos botones son la lección del contrato hecha pantalla.** El mismo
+> formulario a medio llenar que «la ficha completa» rechaza, «solo lo que
+> cambié» lo guarda. La diferencia no la decide ningún `if`: la decide **qué
+> se envía**.
+
 ## 4. Requisitos no funcionales
 
 - **Un solo comando**: `docker compose up -d --build` (Artículo 4).
@@ -125,6 +168,27 @@ otros nombres.
    base. Todas sus verificaciones pasan **con SQL Server apagado** — que es
    la prueba de que las capas están desacopladas ([3_plan](3_plan.md) §4.6).
 
+8. **La PANTALLA muestra el catálogo.** `http://localhost:8071/areas-de-conocimiento`
+   trae las 218 filas en una tabla, con sus cuatro columnas. Los datos que
+   muestra son **los que dio la API**: se comprueba pidiéndole a la API las
+   primeras filas y buscándolas en la pantalla.
+9. **El ciclo completo se puede hacer desde la pantalla**, sin tocar Swagger ni
+   `curl`: agregar, editar con los dos botones y retirar. Lo hace una persona
+   ([7_quickstart §4.2](7_quickstart.md)), porque Blazor Server manda los clics
+   por una conexión persistente y un guion no puede llenar el formulario.
+10. **La pantalla no le habla al usuario en jerga.** Ni «PUT», ni «422», ni
+    `area_conocimiento`. Se comprueba **sobre el texto visible**, no sobre el
+    código fuente de la página.
+11. **SON DOS PROCESOS, y se demuestra apagando uno.** Con
+    `docker compose stop api-investigacion`, la pantalla **sigue respondiendo**
+    —con su menú, su marco y su pie—, muestra «El servicio no está disponible»
+    y **no muestra ni un dato**. Si el front pudiera llegar a SQL Server por su
+    cuenta, seguiría mostrando el catálogo.
+
+> **Los criterios 8 a 11 son los que la v1 no tenía.** Sin ellos, una versión
+> con la API perfecta y sin pantalla pasaba como terminada — y eso es media
+> versión.
+
 ## 6. Clarificaciones
 
 > **Qué es esta sección:** el registro de las ambigüedades detectadas
@@ -148,8 +212,12 @@ otros nombres.
 
 La v1 está terminada —y solo entonces se escribe la spec de la v2— cuando:
 
-1. Los **7 criterios de aceptación** pasan, verificados con el smoke test
-   de [7_quickstart.md](7_quickstart.md) **corrido por una persona**.
+1. Los **11 criterios de aceptación** pasan, verificados con el smoke test
+   de [7_quickstart.md](7_quickstart.md) **corrido por una persona** — los
+   siete de la API y los cuatro de la pantalla.
+1.1 **La pantalla funciona.** `python pruebas_humo/humo_front.py` da todo en
+   verde, y el recorrido a mano de [7_quickstart §4.2](7_quickstart.md) se hizo
+   completo. Una versión no está cerrada si la API responde y la pantalla no.
 2. La lista de [9_checklist.md](9_checklist.md) está en verde y firmada.
 3. No queda ningún `[NECESITA ACLARACIÓN: …]` en este documento.
 4. Se hace commit y **tag `v1`** (Artículo 1).

@@ -137,3 +137,61 @@ todos deben seguir pasando antes de cerrar la nueva.
 | El contenedor de SQL Server se reinicia solo | Contraseña que no cumple la política (8+ caracteres, mayúscula, minúscula, dígito y símbolo) o poca memoria: pide ~2 GB |
 | Un inactivo aparece en el listado | A alguna consulta le falta `WHERE activo = 1` ([3_plan](3_plan.md) §4.2) |
 | `bad interpreter: /bin/bash^M` | `db/init.sh` se guardó con finales de línea de Windows. Es lo que previene `*.sh text eol=lf` en `.gitattributes` |
+
+
+---
+
+## 4. El front: la otra mitad de la versión
+
+```powershell
+docker compose up -d --build
+```
+
+Ese mismo comando levanta **tres** contenedores, no dos:
+
+| Qué | Dónde |
+|---|---|
+| **LA PANTALLA** (lo que ve el usuario) | <http://localhost:8071> |
+| La API — documentación interactiva | <http://localhost:8070/swagger> |
+| SQL Server (opcional, para DBeaver) | `localhost:11470` · usuario `sa` |
+
+### 4.1 La prueba automática
+
+```powershell
+python pruebas_humo/humo_front.py
+```
+
+Comprueba que las pantallas responden, que **los datos que muestran son los que
+dio la API**, que no aparece jerga, y —lo que importa— que **con la API apagada
+la pantalla sigue en pie con su aviso**. La apaga y la vuelve a encender sola.
+
+**Lo que esa prueba NO puede hacer, y hay que decirlo:** Blazor Server manda
+los clics por una conexión persistente, así que un guion no puede llenar el
+formulario. Eso queda para el recorrido a mano de abajo.
+
+### 4.2 El recorrido a mano, que hace una persona
+
+1. Abra <http://localhost:8071>. La pantalla de inicio tiene el enlace al
+   catálogo, y la barra de direcciones dice `/areas-de-conocimiento` — una
+   dirección de verdad, no un molde.
+2. **Agregue** un área: código `ZZ01`, gran área «Prueba», área «Prueba»,
+   disciplina «Prueba». Aparece en la tabla.
+3. **Agréguela otra vez**, con el mismo código. Sale un aviso rojo con el
+   mensaje que mandó la API — y **el formulario conserva lo que usted escribió**.
+4. **Edítela** y use **«Guardar solo lo que cambié»** dejando dos campos
+   vacíos: guarda, y los campos que dejó en blanco quedan como estaban.
+5. Ahora **«Guardar la ficha completa»** con un campo vacío: se rechaza. *El
+   mismo formulario, dos comportamientos.*
+6. **Retírela.** Pide confirmación y desaparece de la tabla. Pero siga:
+   ```powershell
+   curl "http://localhost:8070/api/area_conocimiento/ZZ01"
+   ```
+   Responde **404** — y sin embargo **la fila sigue en la base**: el borrado es
+   lógico. Compruébelo con DBeaver si quiere.
+7. **Apague la API** y recargue la pantalla:
+   ```powershell
+   docker compose stop api-investigacion
+   ```
+   La pantalla sigue cargando, con su menú y su pie, y dice que el servicio no
+   está disponible. **Eso es lo que demuestra que son dos procesos.** Vuelva a
+   levantarla con `docker compose start api-investigacion`.
