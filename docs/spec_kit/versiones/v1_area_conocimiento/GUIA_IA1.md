@@ -263,3 +263,67 @@ cosa, no está mejorando: está ignorando la spec.
 Si la respuesta no es «sigue en pie, con un aviso y sin datos», el front está
 leyendo de donde no debe — o no maneja el caso de que la API no responda, que
 es el mismo problema visto de otro lado.
+
+
+---
+
+## Antes de abrir el chat: prepare SU proyecto
+
+**Ojo: NO se construye dentro de la carpeta clonada.** El repositorio clonado
+es el **material de referencia**; su trabajo de reconstrucción va en una
+**carpeta nueva y vacía**, fuera de él.
+
+### 1. La carpeta y las subcarpetas
+
+Cree la carpeta de su proyecto, ábrala en VS Code (*File → Open Folder*) y, en
+la terminal integrada (*Terminal → New Terminal*, PowerShell), parado en ella:
+
+```powershell
+mkdir docs\spec_kit\versiones\v1_area_conocimiento, db, api_investigacion, api_investigacion\Controllers, api_investigacion\Excepciones, api_investigacion\Modelos, api_investigacion\Peticiones, api_investigacion\Repositorios, api_investigacion\Servicios, api_investigacion\pruebas, front_blazor, front_blazor\Components, front_blazor\Components\Layout, front_blazor\Components\Pages, front_blazor\Servicios, front_blazor\wwwroot, pruebas_humo
+```
+
+### 2. Los archivos VACÍOS
+
+**Usted los va llenando** uno a uno, pegando en cada uno el código que la IA le
+entregue. Que nazcan vacíos y con su nombre puesto es lo que le da forma al
+trabajo: se ve de una vez cuántas piezas son y dónde va cada una.
+
+```powershell
+New-Item .gitattributes, .gitignore, api_investigacion\ApiInvestigacion.csproj, api_investigacion\Controllers\AreaConocimientoController.cs, api_investigacion\Dockerfile, api_investigacion\Excepciones\NoEncontradoExcepcion.cs, api_investigacion\Modelos\AreaConocimiento.cs, api_investigacion\Peticiones\AreaConocimientoActualizar.cs, api_investigacion\Peticiones\AreaConocimientoCrear.cs, api_investigacion\Peticiones\AreaConocimientoReemplazo.cs, api_investigacion\Program.cs, api_investigacion\Repositorios\IRepositorioAreaConocimiento.cs, api_investigacion\Repositorios\RepositorioAreaConocimientoSqlServer.cs, api_investigacion\Servicios\IServicioAreaConocimiento.cs, api_investigacion\Servicios\ServicioAreaConocimiento.cs, api_investigacion\appsettings.json, api_investigacion\pruebas\Programa.cs, api_investigacion\pruebas\PruebaCapas.csproj, docker-compose.yml, front_blazor\Components\App.razor, front_blazor\Components\Layout\MainLayout.razor, front_blazor\Components\Layout\NavMenu.razor, front_blazor\Components\Pages\AreasDeConocimiento.razor, front_blazor\Components\Pages\Home.razor, front_blazor\Components\Routes.razor, front_blazor\Components\_Imports.razor, front_blazor\Dockerfile, front_blazor\FrontInvestigacion.csproj, front_blazor\Program.cs, front_blazor\Servicios\ServicioAreaConocimiento.cs, front_blazor\appsettings.json, front_blazor\wwwroot\app.css, pruebas_humo\humo_front.py
+```
+
+> **Fíjese en lo que la lista tiene y en lo que no.**
+>
+> **Tiene** los archivos del front —`front_blazor\…`— porque **la versión
+> incluye su pantalla** (Artículo 1.1). Son la mitad del trabajo, no un
+> añadido, y por eso nacen vacíos junto a los de la API.
+>
+> **No tiene** nada de `db\`: esos no nacen vacíos, se copian (paso 3).
+
+### 3. Los archivos que vienen DADOS: cópielos del repositorio del curso
+
+Con el explorador de Windows (Ctrl+C, Ctrl+V), cada uno a la misma ruta:
+
+| Del clon del curso | A su proyecto |
+|---|---|
+| `db\init.sh` | `db\` |
+| `db\investigacion.sql` | `db\` |
+| `docs\spec_kit\1_constitution.md` | `docs\spec_kit\` |
+| Los `.md` de `docs\spec_kit\versiones\v1_area_conocimiento\` | la misma ruta |
+
+Estos vienen dados y **la IA no los genera**: los documentos se le SUBEN al
+chat, y los scripts de `db\` son la base de datos ya escrita.
+
+### 4. Compruebe antes de empezar
+
+- [ ] `docs\spec_kit\1_constitution.md` existe y tiene contenido.
+- [ ] `docs\spec_kit\versiones\v1_area_conocimiento\` tiene **9 archivos**.
+- [ ] `db\` tiene sus scripts **con contenido**, no vacíos.
+- [ ] `front_blazor\` existe con sus carpetas, aunque los archivos estén
+      vacíos: si no está, la versión va a nacer sin la mitad que se ve.
+
+Si algo está vacío o falta, es el paso 3.
+
+> **La estructura queda lista ANTES de hablar con la IA**, y es la que describe
+> `3_plan.md`. Así el chat entrega código para archivos que ya existen, en vez
+> de proponerle a usted dónde ponerlos.
