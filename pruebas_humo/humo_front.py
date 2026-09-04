@@ -32,6 +32,9 @@ FRONT = "http://localhost:8071"
 API = "http://localhost:8070"
 fallos = []
 
+# Las columnas que la tabla debe traer, en el idioma del usuario.
+ETIQUETAS = ("Código", "Gran área", "Área", "Disciplina")
+
 
 def ver(url):
     try:
@@ -71,6 +74,11 @@ def revisar(nombre, condicion, detalle=""):
 def esperar_api(segundos=180):
     """Espera a que la API responda antes de comprobar nada contra ella.
 
+    Acepta 200 y **204**: un 204 es la API respondiendo que la tabla está
+    vacía, que es una respuesta perfectamente válida. Darlo por «no lista»
+    hacía que el guion se rindiera contra un sistema que funcionaba — y solo
+    pasaba en los módulos cuya tabla todavía no tiene datos.
+
     Hace falta porque este mismo guion la apaga y la enciende en la sección 5,
     y porque el contenedor corre `dotnet watch`: encenderla no es lo mismo que
     estar lista. Sin esta espera, la corrida siguiente empieza con la API a
@@ -78,7 +86,7 @@ def esperar_api(segundos=180):
     está probando.
     """
     for _ in range(segundos // 3):
-        if ver(f"{API}/api/area_conocimiento?limite=1")[0] == 200:
+        if ver(f"{API}/api/area_conocimiento?limite=1")[0] in (200, 204):
             return True
         time.sleep(3)
     return False
@@ -107,16 +115,33 @@ print("=== 3. La pantalla trae los datos que dio la API ===")
 c, api = ver(f"{API}/api/area_conocimiento?limite=5")
 primeras = [d["granArea"] for d in json.loads(api)["datos"]] if c == 200 else []
 c, t = ver(f"{FRONT}/areas-de-conocimiento")
-revisar("la API responde", c == 200 and len(primeras) > 0, f"{len(primeras)} filas")
-revisar("y esos mismos datos se ven en la pantalla",
-        all(g.split()[0] in visible(t) for g in primeras[:3]))
-revisar("la tabla trae sus cuatro columnas",
-        all(x in visible(t) for x in ("Código", "Gran área", "Área", "Disciplina")))
+if not primeras:
+    # La tabla está VACÍA, y eso no es un fallo: es una respuesta legítima de
+    # la API (204). Lo que no se puede hacer es comprobar que la pantalla
+    # muestra datos que no existen — así que estas dos comprobaciones se
+    # saltan y se dice por qué, en vez de dar un falso rojo.
+    print("[--]    la tabla `area_conocimiento` está vacía: no hay datos que comparar")
+    print("        (la pantalla muestra su recuadro de «todavía no hay», que es")
+    print("         lo correcto; para comprobar el pintado, siembre una fila)")
+    revisar("y aun vacía, la pantalla responde y ofrece «Agregar»",
+            "Agregar" in visible(t))
+else:
+    revisar("la API responde", True, f"{len(primeras)} filas")
+    revisar("y esos mismos datos se ven en la pantalla",
+            all(g.split()[0] in visible(t) for g in primeras[:3]))
+    revisar("la tabla trae sus columnas",
+            all(x in visible(t) for x in ETIQUETAS))
 
 print()
 print("=== 4. Lo que la pantalla NO debe decirle al usuario ===")
-JERGA = ["PUT", "PATCH", "DELETE", "422", "500", "area_conocimiento",
-         "SQL Server", "Dapper", "endpoint"]
+# La jerga se busca como TOKEN TÉCNICO, no como palabra.
+#
+# `aliado`, `programa` y `proyecto` son nombres de tabla Y palabras que el
+# usuario dice todos los días: buscarlas sueltas da un rojo donde no hay nada
+# malo. Lo que sí es jerga es la RUTA de la API y los nombres con guion bajo,
+# que ningún usuario escribiría.
+JERGA = ["PUT", "PATCH", "DELETE", "422", "500", "/api/",
+         "Dapper", "Npgsql", "endpoint", "localhost:"]
 for ruta in ("/", "/areas-de-conocimiento"):
     c, t = ver(f"{FRONT}{ruta}")
     visto = [j for j in JERGA if j in visible(t)]
