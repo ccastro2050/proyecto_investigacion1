@@ -128,3 +128,20 @@ Vale la pena leerlo por una razón: **la especificación se escribió primero,
 y el código se construyó con IA siguiéndola.** Las correcciones que hubo no
 fueron parches al código: fueron huecos del plan, que se taparon en el
 documento y no en el programa.
+
+## Material conceptual del curso
+
+Los conceptos del curso, **con el código de este repositorio como material**: los ejemplos hablan de `area_conocimiento`, no de un proyecto de otro módulo.
+
+| Documento | Qué cubre |
+|---|---|
+| [Flujo de una peticion](docs/FLUJO_DE_UNA_PETICION.md) | El viaje completo de una petición por las capas, de la ruta al SQL y de vuelta |
+| [Paradigma poo](docs/PARADIGMA_POO.md) | Qué es un paradigma, los cuatro pilares de la P.O.O., y dónde vive cada paradigma en este proyecto |
+| [Solid capas patrones](docs/SOLID_CAPAS_PATRONES.md) | Los cinco principios SOLID y las tres capas — con el archivo de este repositorio donde se ve cada uno |
+| [Principios acid](docs/PRINCIPIOS_ACID.md) | Las cuatro garantías transaccionales, cada una señalada en el código y en la base de ESTE módulo |
+| [Programacion asincronica](docs/PROGRAMACION_ASINCRONICA.md) | Qué resuelve el asincronismo en la web, qué se daña sin él, y cómo se ve en este código |
+| [Conceptos docker](docs/CONCEPTOS_DOCKER.md) | Imagen, contenedor, volumen y compose, con el `docker-compose.yml` de aquí explicado línea por línea |
+| [Calidad de pruebas](docs/CALIDAD_DE_PRUEBAS.md) | Cobertura, la métrica CRAP y las pruebas de mutación: cómo saber si sus pruebas de verdad protegen |
+| [Sdd speckit](docs/SDD_SPECKIT.md) | La metodología con la que se trabaja este curso: la especificación manda sobre el código |
+
+> Los tutoriales de administración de la base de datos (pgAdmin, SSMS, phpMyAdmin, SQLTools) **no están todavía**: llevan capturas de pantalla que hay que tomar contra la base de este módulo.
