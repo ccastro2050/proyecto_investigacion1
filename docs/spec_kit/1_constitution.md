@@ -224,6 +224,26 @@ un 404 o un 422 tienen su formato exacto documentado.
 | Errores | Cuerpo inválido (la petición) → **422** · `ArgumentException` → **400** · `NoEncontradoExcepcion` → **404** · `SqlException` y demás → **500** · lectura sin filas → **204** |
 | Credenciales | Usuario `sa`. **La contraseña no se escribe en este documento:** en esta plantilla vive en el `docker-compose.yml` y en un proyecto real, en el `.env` (Artículo 7) |
 
+## Artículo 10.1 — Una ruta y un servicio por recurso, nunca genéricos
+
+La API expone `/api/area_conocimiento`. **No existe ni existirá** un `/api/{tabla}` con
+el nombre de la tabla como parámetro, y del lado del front hay un
+`ServicioAreaConocimiento`, no un `ApiService.Listar("area_conocimiento")`.
+
+Lo genérico es más corto de escribir y más caro de vivir:
+
+| | |
+|---|---|
+| **No puede validar** | Cada tabla tiene sus campos y sus reglas. Un endpoint que sirve para todas no puede exigir ninguno |
+| **No puede documentarse** | ¿Qué campos pide `/api/{tabla}`? Swagger no lo sabe, y quien lo consume, tampoco |
+| **Apaga el compilador** | `Listar("area_conocimientos")` compila. `ServicioAreaConocimiento.Listar()` no deja escribir el error |
+| **Vuelve el esquema un contrato** | Renombrar una columna deja de ser un cambio interno y pasa a romper a quien consume, en silencio |
+
+Cuando el módulo tenga más recursos habrá **un controlador, un servicio y una
+pantalla por cada uno**. Se van a parecer mucho, y esa repetición es el precio
+—consciente— de que cada recurso pueda decir lo suyo.
+
+
 ## Artículo 11 — Cómo se enmienda esta constitución
 
 Una regla se cambia **solo** así: se propone en el `4_research.md` de la
