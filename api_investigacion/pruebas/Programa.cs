@@ -67,7 +67,22 @@ public class RepositorioFalso : IRepositorioAreaConocimiento
 
 public class Programa
 {
-    public static async Task Main(string[] args)
+    // Recuerda si alguna comprobación falló. Sin esto la prueba narra el
+    // problema pero el proceso termina bien, y nadie que la corra se entera.
+    private static bool _bien = true;
+
+    /// <summary>
+    /// La línea que PUEDE FALLAR: comprueba la condición, dice qué pasó y deja
+    /// constancia si no se cumplió. Es un «assert» escrito a mano: lo mismo que
+    /// hace Assert.Equal de xUnit, sin instalar el framework.
+    /// </summary>
+    private static void Revisar(bool condicion, string ok, string error)
+    {
+        Console.WriteLine(condicion ? $"[OK] {ok}" : $"[ERROR] {error}");
+        if (!condicion) _bien = false;
+    }
+
+    public static async Task<int> Main(string[] args)
     {
         Console.WriteLine("=== Ejecutando Prueba de Capas sin Base de Datos ===");
 
@@ -77,28 +92,30 @@ public class Programa
 
         // Prueba 1: Obtener existente
         var existente = await servicio.ObtenerPorCodigo("1A01");
-        Console.WriteLine($"[OK] Área obtenida correctamente: {existente.Disciplina}");
+        Revisar(existente.Disciplina == "Matemáticas puras",
+                $"Área obtenida correctamente: {existente.Disciplina}",
+                "Buscar 1A01 no devolvió el área sembrada en el repositorio falso.");
 
         // Prueba 2: Obtener inexistente lanza NoEncontradoExcepcion
         try
         {
             await servicio.ObtenerPorCodigo("9Z99");
-            Console.WriteLine("[ERROR] Debió lanzar NoEncontradoExcepcion.");
+            Revisar(false, "", "Debió lanzar NoEncontradoExcepcion.");
         }
         catch (NoEncontradoExcepcion)
         {
-            Console.WriteLine("[OK] Excepción NoEncontradoExcepcion capturada correctamente al buscar inexistente.");
+            Revisar(true, "Excepción NoEncontradoExcepcion capturada correctamente al buscar inexistente.", "");
         }
 
         // Prueba 3: Validación de limite invalido lanza ArgumentException
         try
         {
             await servicio.ObtenerTodas(0);
-            Console.WriteLine("[ERROR] Debió lanzar ArgumentException.");
+            Revisar(false, "", "Debió lanzar ArgumentException.");
         }
         catch (ArgumentException)
         {
-            Console.WriteLine("[OK] Excepción ArgumentException capturada correctamente ante límite <= 0.");
+            Revisar(true, "Excepción ArgumentException capturada correctamente ante límite <= 0.", "");
         }
 
         // Prueba 4: PATCH sin ningún campo lanza ArgumentException, no NoEncontradoExcepcion.
@@ -106,26 +123,32 @@ public class Programa
         try
         {
             await servicio.ActualizarParcial("1A01", null, null, null);
-            Console.WriteLine("[ERROR] Debió lanzar ArgumentException por cuerpo vacío.");
+            Revisar(false, "", "Debió lanzar ArgumentException por cuerpo vacío.");
         }
         catch (ArgumentException)
         {
-            Console.WriteLine("[OK] Cuerpo vacío en actualización parcial rechazado con ArgumentException.");
+            Revisar(true, "Cuerpo vacío en actualización parcial rechazado con ArgumentException.", "");
         }
 
         // Prueba 5: eliminar dos veces. La segunda debe fallar como inexistente (C5).
         await servicio.Eliminar("1A01");
-        Console.WriteLine("[OK] Primera eliminación realizada.");
+        Console.WriteLine("Primera eliminación realizada.");   // narra, no comprueba
         try
         {
             await servicio.Eliminar("1A01");
-            Console.WriteLine("[ERROR] La segunda eliminación debió lanzar NoEncontradoExcepcion.");
+            Revisar(false, "", "La segunda eliminación debió lanzar NoEncontradoExcepcion.");
         }
         catch (NoEncontradoExcepcion)
         {
-            Console.WriteLine("[OK] Segunda eliminación rechazada: para la API ya no existe.");
+            Revisar(true, "Segunda eliminación rechazada: para la API ya no existe.", "");
         }
 
-        Console.WriteLine("=== Prueba de capas completada CON ÉXITO ===");
+        Console.WriteLine(_bien
+            ? "=== Prueba de capas completada CON ÉXITO ==="
+            : "=== Prueba de capas FALLIDA: mire los [ERROR] de arriba ===");
+
+        // El código de salida es lo que mira quien corre la prueba en
+        // automático: 0 = pasó, cualquier otra cosa = falló.
+        return _bien ? 0 : 1;
     }
 }
