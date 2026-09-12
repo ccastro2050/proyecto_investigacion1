@@ -43,25 +43,40 @@ Esto es de la prueba de capas de **este** repositorio, en
 `api_investigacion/pruebas/Programa.cs`:
 
 ```csharp
-// PREPARAR: el servicio, armado con un repositorio falso en memoria
-var servicio = new ServicioProducto(new RepositorioFalsoEnMemoria());
+// PREPARAR (Arrange): el servicio, armado con un repositorio falso en memoria
+IRepositorioAreaConocimiento repoFalso = new RepositorioFalso();
+IServicioAreaConocimiento servicio = new ServicioAreaConocimiento(repoFalso);
 
-// EJECUTAR: la operación que se quiere probar
-await servicio.CrearAsync(new Producto { Codigo = "T1", Nombre = "Test", Stock = 5, Valorunitario = 100m });
-
-// COMPROBAR: la línea que PUEDE FALLAR — esta línea ES la prueba
-Verificar((await servicio.ListarAsync(10))[0].Codigo == "T1", "crear + listar");
+// EJECUTAR (Act) y COMPROBAR (Assert) van juntos: la operación se
+// lanza dentro del try, y la comprobación es cuál de las dos ramas
+// llega a correr. Esta prueba no tiene una función que compruebe:
+// si entra al catch, la regla se cumplió; si sigue de largo, no.
+try
+{
+    await servicio.ObtenerPorCodigo("9Z99");
+    Console.WriteLine("[ERROR] Debió lanzar NoEncontradoExcepcion.");
+}
+catch (NoEncontradoExcepcion)
+{
+    Console.WriteLine("[OK] Excepción NoEncontradoExcepcion capturada correctamente al buscar inexistente.");
+}
 ```
 
-> **Los tres comentarios en mayúscula no están en el archivo:** los agregué
-> aquí para señalar las partes. El código sí es el de su repositorio, línea
-> por línea — vaya y compárelo.
+> **Los comentarios en mayúscula no están en el archivo:** los agregué
+> aquí para señalar las partes. El código sí es el de su repositorio,
+> línea por línea — vaya y compárelo.
 
 
-**La tercera parte es la prueba.** Las dos primeras solo montan la escena. Si
-borra el `Verificar`, el programa sigue corriendo, sigue sin dar error… y ya
-no está probando nada. Vuelva a esta idea en la Parte 2, porque es el origen
-de todo lo que viene.
+**La tercera parte es la prueba.** Las dos primeras solo montan la escena.
+Aquí la comprobación es el `try`/`catch`: si borra el `try` entero, el
+programa sigue corriendo, sigue sin dar error… y ya no está probando nada.
+Vuelva a esta idea en la Parte 2, porque es el origen de todo lo que viene.
+
+> **En este repositorio no hay una función que compruebe.** Otros proyectos
+> del curso tienen una (`Verificar`, `Revisar`) y aquí no: la comprobación
+> son el `try`/`catch` y los mensajes `[OK]` / `[ERROR]`. Los ejemplos que
+> siguen usan `Verificar(...)` para nombrar *esa* tercera parte, la que puede
+> fallar, se llame como se llame en cada proyecto.
 
 ### Probar que algo FALLA también es probar
 
@@ -85,7 +100,7 @@ para el caso en que la excepción no ocurra. Sin esa línea, una prueba que
 debía fallar y no falló pasaría en silencio.
 
 
-### «verificar» es un `assert` hecho a mano
+### El `assert`, aquí hecho a mano
 
 Si ha visto pruebas en otra parte, le va a faltar una palabra: **`assert`**.
 Ese es el nombre estándar de **la línea que puede fallar**, y cada lenguaje
@@ -96,17 +111,33 @@ tiene la suya:
 | Python (pytest) | la palabra reservada `assert` |
 | C# (xUnit) | `Assert.Equal(esperado, obtenido)` |
 | PHP (PHPUnit) | `$this->assertSame(...)` |
-| **Este curso** | `Verificar(condición, "descripción")` |
+| **Este repositorio** | no hay función: el `try`/`catch` y un `Console.WriteLine("[OK] …")` o `("[ERROR] …")` |
 
-**Es lo mismo.** En este proyecto está escrito a mano:
+**Casi lo mismo, y la diferencia importa.** Aquí está escrito a mano:
 
 ```csharp
 // Con xUnit, un framework de pruebas:
-Assert.Equal("T1", (await servicio.ListarAsync(10))[0].Codigo);
+await Assert.ThrowsAsync<NoEncontradoExcepcion>(() => servicio.ObtenerPorCodigo("9Z99"));
 
-// En este curso, sin framework:
-Verificar((await servicio.ListarAsync(10))[0].Codigo == "T1", "crear + listar");
+// En este repositorio, sin framework:
+try
+{
+    await servicio.ObtenerPorCodigo("9Z99");
+    Console.WriteLine("[ERROR] Debió lanzar NoEncontradoExcepcion.");
+}
+catch (NoEncontradoExcepcion)
+{
+    Console.WriteLine("[OK] Excepción NoEncontradoExcepcion capturada correctamente al buscar inexistente.");
+}
 ```
+
+> **La diferencia:** `Assert.ThrowsAsync` **falla** la prueba; el
+> `Console.WriteLine("[ERROR] …")` solo la **narra**. Este archivo imprime el
+> problema y termina bien: `Main` devuelve `Task`, sin código de salida, así
+> que quien lo corra en automático no se entera de nada. Arreglarlo es
+> pequeño: cambiar `Task` por `Task<int>` en `Main`, recordar en una variable
+> si hubo algún `[ERROR]` y devolver `1` en ese caso. Es exactamente lo que
+> reclama la Parte 2 de este documento.
 
 ### ¿Por qué a mano, y no con xUnit?
 
