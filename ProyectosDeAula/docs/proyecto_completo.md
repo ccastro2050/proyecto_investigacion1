@@ -83,3 +83,7 @@ subdivida el trabajo por módulo (una rebanada por integrante).
   variables de entorno; `.env` en el `.gitignore`; `.env.example` en el
   repo. (En los repos del curso están quemados SOLO por didáctica — aquí no.)
 - **La spec primero**: sin spec kit de la versión, la versión no se recibe.
+
+---
+
+> **Qué se espera de la versión 2:** [VERSION_2.md](VERSION_2.md).
