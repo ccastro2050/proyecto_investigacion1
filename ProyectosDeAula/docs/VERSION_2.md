@@ -325,11 +325,24 @@ seguir funcionando»: se corren.
 | **El código** | Repositorios que **llaman** a los procedimientos |
 | **La interfaz gráfica** | Las pantallas de los recursos nuevos. **Una versión no está cerrada si la API responde y la interfaz no** |
 | **La colección de pruebas** | Con las peticiones nuevas, **incluidas las que tienen que fallar** |
+| **LOS PROMPTS** | Los que **de verdad usaron** para generar el código a partir del spec kit — por chat o con el IDE agéntico—, **con lo que tuvieron que corregirle a la IA**. Van en la carpeta de la versión, al lado de su guía de IA |
 | **El tag `v2`** | Sobre el commit que pasa los doce criterios |
 
 > **El spec kit se escribe ANTES.** Si se escribe al final es un informe de lo
 > que se hizo, y entonces no sirvió para decidir nada. Las tres compuertas
 > están en [0_METODOLOGIA.md](0_METODOLOGIA.md) §3.1.
+
+> **Y los prompts se entregan SIEMPRE**, en las dos modalidades: el del chat y
+> el del IDE agéntico. No es burocracia — es el eslabón del medio.
+>
+> El spec kit dice **qué** construir. El código es **lo construido**. El prompt
+> es **cómo se pasó de uno al otro**: entregar los dos extremos y no el medio
+> es entregar un resultado sin su procedimiento.
+>
+> **Y lo que más vale es lo que tuvieron que corregirle a la IA.** Si pidieron
+> algo y salió mal, la corrección que lo arregló dice más del equipo que el
+> código final — y en la sustentación individual es lo que distingue a quien
+> dirigió el trabajo de quien pegó una respuesta.
 
 ---
 
