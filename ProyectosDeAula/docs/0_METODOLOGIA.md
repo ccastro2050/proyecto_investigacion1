@@ -61,16 +61,18 @@ Las antiguas "entregas" ahora son **versiones** con spec kit propio:
 
 ### 2.1 Calendario y evaluación del semestre (100%)
 
-Las fechas generales aplican a todos los grupos; la **fecha exacta** de su
-grupo la fija el profesor en clase (anótela en el espacio en blanco).
+**Este repositorio es un EJEMPLO para las dos universidades**, y cada una tiene
+su propio calendario. Por eso aquí no hay fechas: las de su curso están en el
+repositorio de su curso, y la **fecha exacta** de su grupo la fija el profesor
+en clase (anótela en el espacio en blanco).
 
-| Momento | Fecha general | Fecha exacta (su grupo) | Evaluación |
+| Momento | Fecha (la fija su curso) | Fecha exacta (su grupo) | Evaluación |
 |---|---|---|---|
-| **Evaluación individual teórico-práctica** | Segunda semana de **septiembre** | \_\_\_\_/\_\_\_\_/\_\_\_\_\_\_\_\_ | **20%** individual |
-| **Entrega versión 1** | Última semana de **septiembre** | \_\_\_\_/\_\_\_\_/\_\_\_\_\_\_\_\_ | **20%** — 10% sustentación individual (incluidos los commits) + 10% entrega en equipo |
-| **Entrega versión 2** | Última semana de **octubre** | \_\_\_\_/\_\_\_\_/\_\_\_\_\_\_\_\_ | **20%** — 10% sustentación individual (incluidos los commits) + 10% entrega en equipo |
-| **Entrega versión 3** | Segunda semana de **noviembre** | \_\_\_\_/\_\_\_\_/\_\_\_\_\_\_\_\_ | **20%** — 10% sustentación individual (incluidos los commits) + 10% entrega en equipo |
-| **Entrega versión 4** | Última semana de **noviembre** | \_\_\_\_/\_\_\_\_/\_\_\_\_\_\_\_\_ | **20%** — 10% sustentación individual (incluidos los commits) + 10% entrega en equipo |
+| **Evaluación individual teórico-práctica** | — | \_\_\_\_/\_\_\_\_/\_\_\_\_\_\_\_\_ | **20%** individual |
+| **Entrega versión 1** | — | \_\_\_\_/\_\_\_\_/\_\_\_\_\_\_\_\_ | **20%** — 10% sustentación individual (incluidos los commits) + 10% entrega en equipo |
+| **Entrega versión 2** | — | \_\_\_\_/\_\_\_\_/\_\_\_\_\_\_\_\_ | **20%** — 10% sustentación individual (incluidos los commits) + 10% entrega en equipo |
+| **Entrega versión 3** | — | \_\_\_\_/\_\_\_\_/\_\_\_\_\_\_\_\_ | **20%** — 10% sustentación individual (incluidos los commits) + 10% entrega en equipo |
+| **Entrega versión 4** | — | \_\_\_\_/\_\_\_\_/\_\_\_\_\_\_\_\_ | **20%** — 10% sustentación individual (incluidos los commits) + 10% entrega en equipo |
 
 > **"Incluidos los commits"** significa que en la sustentación individual
 > cada estudiante responde por SU rama: qué hizo, por qué, y sus commits

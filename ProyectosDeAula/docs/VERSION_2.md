@@ -3,9 +3,11 @@
 > Para el **equipo**. Qué tiene que estar listo al entregar la v2, cómo se
 > comprueba y qué se entrega.
 >
-> **Entrega: última semana de octubre · 20%** — 10% de sustentación individual
-> (incluidos sus commits) + 10% de entrega en equipo. La fecha exacta la fija
-> el profesor en clase.
+> **Entrega: 20%** — 10% de sustentación individual
+> (incluidos sus commits) + 10% de entrega en equipo.
+>
+> **La fecha la fija su curso:** este repositorio es un ejemplo para las dos
+> universidades, y cada una tiene su calendario.
 >
 > El método, el calendario y la rúbrica están en
 > [0_METODOLOGIA.md](0_METODOLOGIA.md). Esto es **el detalle de la v2**.
