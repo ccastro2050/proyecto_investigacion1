@@ -10,7 +10,10 @@
 > El método, el calendario y la rúbrica están en
 > [0_METODOLOGIA.md](0_METODOLOGIA.md). Esto es **el detalle de la v2**.
 >
-> **Este repositorio:** C# / ASP.NET Core + Blazor sobre **SQL Server**.
+> **Su stack:** la API en **C# / ASP.NET Core** sobre **SQL Server**.
+> **El front es a libre elección del equipo** — Blazor, Flask, React, lo que
+> decidan y sepan sostener. Lo que no es libre es que haya uno: una versión
+> no está cerrada si la API responde y la interfaz no.
 
 ---
 
@@ -75,7 +78,7 @@ Las que cada módulo ya tiene en su esquema. **Busque las del suyo.**
 > **Qué significa que algo sea detalle.** Un `estudios_realizados` **no existe
 > sin su `docente`**. No se crea suelto y después se le busca padre.
 
-**Lo que se espera en la interfaz:** al abrir un maestro, ver **su detalle ahí
+**Lo que se espera en la interfaz —sea cual sea la que elijan—:** al abrir un maestro, ver **su detalle ahí
 mismo** y poder agregarle renglones sin salir de la pantalla. No un menú aparte
 donde haya que volver a elegir de qué maestro se trata.
 
