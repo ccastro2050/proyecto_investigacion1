@@ -128,8 +128,8 @@ sigue hasta que quede en verde**. Están explicados con ejemplos en el
 > de una — y salen antes de costar código. Las casillas las marca una
 > persona: una IA puede ayudar a evaluar, pero no puede auto-aprobarse.
 
-Y una regla que vale oro cuando se trabaja con IA: **la ambigüedad se
-MARCA, no se rellena.** Cuando algo no está definido, se escribe
+Y al trabajar con una IA: **la ambigüedad se MARCA, no se rellena.**
+Cuando algo no está definido, se escribe
 `[NECESITA ACLARACIÓN: …]` en la spec y se resuelve en la compuerta 1,
 antes de planear. Si una IA les dice "asumo que…" o "por defecto voy
 a…", **párenla**: eso es una ambigüedad de la especificación disfrazada de
